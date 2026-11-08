@@ -1,0 +1,1 @@
+{"type":"Topology","arcs":[[[74810,99999],[25189,-68807],[-61712,-31192],[-38287,96823],[74810,3176]]],"transform":{"scale":[3.230832308323128e-7,5.765857658576585e-7],"translate":[113.534434,22.105373]},"objects":{"MAC":{"type":"GeometryCollection","geometries":[{"arcs":[[0]],"type":"Polygon","properties":{"id":"MAC+00?","ko":"마카오","en":"Macau","t":"","cc":"MAC"}}]}}}

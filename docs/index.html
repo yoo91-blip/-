@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<title>지도추출기 World</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="대륙·국가·도/주 단위 세계지도를 골라 SVG/PNG로 내려받아 PPT에 바로 넣는 도구">
+<meta name="theme-color" content="#10161d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app" id="app">
+  <aside class="side" id="side">
+    <div class="side-head">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 4v13.5M15 6.5V20" stroke="currentColor" stroke-width="1.8"/></svg>
+        <div>
+          <div class="brand-name">지도추출기 <span>World</span></div>
+          <div class="brand-sub">대륙 › 국가 › 도·주 › 시</div>
+        </div>
+      </div>
+      <button class="sheet-toggle" id="sheetToggle" aria-expanded="false" aria-controls="side">
+        <span id="sheetLabel">목록</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      </button>
+    </div>
+
+    <nav class="crumbs" id="crumbs" aria-label="현재 위치"></nav>
+
+    <label class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2"/></svg>
+      <input id="search" type="search" placeholder="국가·지역 검색 (한/영)" autocomplete="off">
+    </label>
+
+    <div class="list-head">
+      <span id="listTitle">대륙</span>
+      <span class="list-actions">
+        <button id="selAll" class="link">전체선택</button>
+        <button id="selNone" class="link">해제</button>
+      </span>
+    </div>
+    <ul class="list" id="list" role="listbox" aria-multiselectable="true"></ul>
+    <p class="side-foot">지도 데이터: Natural Earth (Public Domain), 한국 시점 경계</p>
+  </aside>
+
+  <main class="main">
+    <div class="toolbar" id="toolbar">
+      <div class="tgroup">
+        <span class="tlabel">모양</span>
+        <div class="seg" role="radiogroup" aria-label="끝단 모양">
+          <button id="shapeRound" role="radio">둥글</button>
+          <button id="shapeAngle" role="radio">각</button>
+        </div>
+      </div>
+      <div class="tgroup grow">
+        <label class="tlabel" for="detail">디테일</label>
+        <input type="range" id="detail" min="1" max="100" value="60">
+        <output id="detailOut" class="num">60</output>
+      </div>
+      <div class="tgroup">
+        <button class="tbtn" id="pinMode" aria-pressed="false" title="지도를 눌러 핀 추가">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.2" fill="currentColor"/></svg>
+          핀 추가
+        </button>
+        <button class="tbtn" id="styleBtn" aria-expanded="false" aria-controls="stylePanel">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3.5v17A8.5 8.5 0 0 0 12 3.5z" fill="currentColor"/></svg>
+          스타일
+        </button>
+      </div>
+      <div class="tgroup dl">
+        <button class="tbtn" id="dlSel" title="선택한 지역만 SVG로">선택만</button>
+        <button class="tbtn primary" id="dlAll">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          SVG 다운로드
+        </button>
+        <button class="tbtn icon" id="moreBtn" aria-expanded="false" aria-controls="morePanel" title="다른 형식">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="stage" id="stage">
+      <svg id="map" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="지도"></svg>
+      <div class="loading" id="loading" hidden>지도 불러오는 중…</div>
+      <div class="hint" id="hint"></div>
+      <div class="focusbar" id="focusbar" hidden>
+        <span id="focusName"></span>
+        <button id="drillBtn" class="tbtn primary small">들어가기 ›</button>
+      </div>
+
+      <div class="panel" id="stylePanel" hidden>
+        <div class="panel-head"><b>스타일</b><button class="x" data-close="stylePanel" aria-label="닫기">×</button></div>
+        <div class="row">
+          <span>프리셋</span>
+          <div class="seg small" id="presets">
+            <button data-preset="dark">다크</button>
+            <button data-preset="light">라이트</button>
+            <button data-preset="mono">모노</button>
+          </div>
+        </div>
+        <label class="row"><span>바탕 지역</span><input type="color" id="cFill"></label>
+        <label class="row"><span>선택 지역</span><input type="color" id="cSel"></label>
+        <label class="row"><span>경계선</span><input type="color" id="cStroke"></label>
+        <label class="row"><span>배경</span><input type="color" id="cBg"></label>
+        <label class="row"><span>선 두께</span><input type="range" id="strokeW" min="0" max="4" step="0.1"><output id="strokeOut" class="num"></output></label>
+        <div class="row">
+          <span>이름 표시</span>
+          <div class="seg small" id="labelMode">
+            <button data-label="none">없음</button>
+            <button data-label="sel">선택만</button>
+            <button data-label="all">전체</button>
+          </div>
+        </div>
+        <label class="row check"><input type="checkbox" id="optContext"> 주변 국가 표시</label>
+        <label class="row check"><input type="checkbox" id="optOverseas"> 해외 영토·원거리 섬 포함</label>
+        <label class="row check"><input type="checkbox" id="optAntarctica"> 세계지도에 남극 표시</label>
+        <label class="row check"><input type="checkbox" id="optBg"> 다운로드에 배경색 포함</label>
+      </div>
+
+      <div class="panel" id="morePanel" hidden>
+        <div class="panel-head"><b>내보내기</b><button class="x" data-close="morePanel" aria-label="닫기">×</button></div>
+        <button class="menu" id="dlPng">PNG 이미지 (고해상도)</button>
+        <button class="menu" id="dlSelPng">PNG · 선택 지역만</button>
+        <button class="menu" id="copySvg">SVG 코드 복사</button>
+        <p class="note">PPT: 삽입 › 그림 › SVG 파일 선택 → 우클릭 <b>도형으로 변환</b> → <b>그룹 해제</b>하면 지역별로 쪼개집니다. (Microsoft 365 / PowerPoint 2019 이상)</p>
+      </div>
+
+      <div class="panel pinpanel" id="pinPanel" hidden>
+        <div class="panel-head"><b>핀 편집</b><button class="x" id="pinClose" aria-label="닫기">×</button></div>
+        <div class="swatches" id="pinColors"></div>
+        <label class="row"><span>크기</span><input type="range" id="pinSize" min="0.5" max="3" step="0.1"><output id="pinSizeOut" class="num"></output></label>
+        <label class="row check"><input type="checkbox" id="pinBorder"> 흰 테두리</label>
+        <div class="row btns">
+          <button class="tbtn small" id="pinDup">복제</button>
+          <button class="tbtn small danger" id="pinDel">핀 삭제</button>
+        </div>
+        <p class="note">드래그로 이동 · Ctrl+C / Ctrl+V 복제 · Delete 삭제</p>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="vendor/d3.min.js"></script>
+<script src="vendor/topojson-client.min.js"></script>
+<script src="vendor/topojson-simplify.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

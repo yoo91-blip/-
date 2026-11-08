@@ -1,0 +1,12 @@
+{
+  "name": "지도추출기 World",
+  "short_name": "지도추출기",
+  "description": "대륙·국가·도/주 단위 세계지도를 SVG/PNG로 내려받아 PPT에 넣는 도구",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#10161d",
+  "theme_color": "#10161d",
+  "lang": "ko",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}
