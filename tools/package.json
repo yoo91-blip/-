@@ -1,0 +1,7 @@
+{
+  "name": "map-data-tools",
+  "private": true,
+  "type": "module",
+  "description": "지도추출기 데이터 가공 스크립트",
+  "dependencies": { "d3-geo": "^3.1.1", "mapshaper": "^0.6.0" }
+}
