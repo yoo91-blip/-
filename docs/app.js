@@ -383,8 +383,10 @@
   const dotted = (key, k) => model.markers.some((mk) => mk.key === key && tiny(mk, k));
   const markerSVG = (mk, x, y) => `<circle cx="${f1(x)}" cy="${f1(y)}" r="4.5" fill="${mk.color}" stroke="#ffffff" stroke-width="1.5"/>`;
 
+  // 지도 위 이름은 짧게: 쉼표 뒤 행정 구분 제거 (예: "Dortmund, Kreisfreie Stadt" → "Dortmund")
+  const shortName = (n) => String(n).split(",")[0].replace(/^(Landkreis|Kreis|District of|Okres|Powiat|powiat|Bezirk|Municipality of|Município de)\s+/i, "").replace(/\s+(District|County|Municipality|Prefecture)$/i, "").trim() || n;
   // 글자 폭 추정(한글·한자는 1em, 라틴 0.6em)
-  const textW = (t, fs) => [...t].reduce((w, ch) => w + (ch.charCodeAt(0) > 0x2e80 ? fs : fs * 0.62), 0);
+  const textW = (t, fs) => [...t].reduce((w, ch) => w + (ch.charCodeAt(0) > 0x2e80 ? fs : fs * 0.66), 0);
   function bestPoly(geom) {
     let best = null, ba = -1;
     const gp = d3.geoPath(projection);
@@ -399,12 +401,17 @@
     m.labels = [];
     if (S.labels === "none") return;
     const out = [], placed = [];
-    const tryPlace = (geom, text, opt) => {
+    const tryPlace = (geom, name, opt) => {
       const b = bestPoly(geom);
       if (!b) return;
-      const fs = opt.fs, tw = textW(text, fs);
-      const fits = opt.force || (b.w >= tw * 0.9 && b.h >= fs * 1.3 && b.area >= tw * fs * 1.6);
-      if (!fits) return;
+      const text = shortName(name);
+      // 큰 글자부터 시도해 들어가는 크기를 고른다
+      let fs = 0, tw = 0;
+      for (const f of opt.force ? [opt.fs] : [opt.fs, opt.fs - 1, opt.fs - 2]) {
+        const w = textW(text, f);
+        if (b.w >= w * 0.8 && b.h >= f * 1.2 && b.area >= w * f * 1.2) { fs = f; tw = w; break; }
+      }
+      if (!fs) { if (!opt.force) return; fs = opt.fs; tw = textW(text, fs); }
       const r = [b.x - tw / 2 - 2, b.y - fs / 2 - 1, b.x + tw / 2 + 2, b.y + fs / 2 + 1];
       if (r[2] < 0 || r[0] > m.W || r[3] < 0 || r[1] > m.H) return;
       if (placed.some((q) => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1])) return;
