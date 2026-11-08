@@ -23,19 +23,20 @@
   const PIN_COLORS = ["#e5484d", "#f5a524", "#f7d038", "#2bb5ad", "#3b82f6", "#8b5cf6", "#8a96a3", "#ffffff", "#111827"];
   const PIN_PATH = "M0,0C-2.2,-5.6 -9,-10.4 -9,-17.5A9,9 0 1 1 9,-17.5C9,-10.4 2.2,-5.6 0,0Z";
   const STORE_KEY = "mapx-world-v3";
-  const SAVE_KEYS = ["shape", "detail", "labels", "context", "overseas", "antarctica", "exportBg", "bg", "fill", "stroke", "strokeW", "preset", "palette", "tool", "seenIntro"];
+  const SAVE_KEYS = ["shape", "detail", "labels", "labelsV2", "context", "overseas", "antarctica", "exportBg", "bg", "fill", "stroke", "strokeW", "preset", "palette", "tool", "seenIntro"];
   const LEVEL_NAME = { world: "대륙", continent: "국가", country: "도·주", region: "시·군·구" };
   const DEPTH = { c: 1, a1: 2, a2: 3 };
 
   // ---------- 상태 ----------
   const defaults = {
-    shape: "angle", detail: 60, labels: "none", context: true, overseas: false, antarctica: false, exportBg: false,
+    shape: "angle", detail: 60, labels: "auto", labelsV2: true, context: true, overseas: false, antarctica: false, exportBg: false,
     ...PRESETS.dark, preset: "dark", palette: DEFAULT_PALETTE.slice(), tool: 0, seenIntro: false,
   };
   const saved = load();
   const S = Object.assign({}, defaults, saved.s || {});
   if (!Array.isArray(S.palette) || S.palette.length !== 5) S.palette = DEFAULT_PALETTE.slice();
   if (typeof S.tool !== "number" && S.tool !== "erase") S.tool = 0;
+  if (!S.labelsV2 || S.labels === "all") { S.labels = "auto"; S.labelsV2 = true; }
   const view = { level: "world", ct: null, cc: null, a1: null };
   // 선택은 단계와 무관하게 전역: key = 단계:id
   const sel = new Map((saved.sel || []).map((x) => [x.lv + ":" + x.id, x]));
@@ -46,6 +47,12 @@
   let model = null;
   let projection = null;
   let zt = d3.zoomIdentity;
+  let baked = d3.zoomIdentity; // 경로를 마지막으로 계산한 시점의 확대 상태
+  // 마지막 계산 이후 추가로 확대/이동한 만큼의 변환
+  const rel = () => { const r = zt.k / baked.k; return d3.zoomIdentity.translate(zt.x - r * baked.x, zt.y - r * baked.y).scale(r); };
+  const toAbs = (R) => d3.zoomIdentity.translate(R.k * baked.x + R.x, R.k * baked.y + R.y).scale(R.k * baked.k);
+  // 확대할수록 경계를 더 정밀하게 (8배 확대 시 최고 정밀도)
+  const effDetail = () => (S.detail >= 100 ? 100 : Math.round(Math.min(100, S.detail + (100 - S.detail) * Math.min(1, Math.log2(Math.max(1, zt.k)) / 3))));
   let busy = false;
 
   const $ = (id) => document.getElementById(id);
@@ -63,10 +70,13 @@
   // ---------- 데이터 ----------
   const data = { world: null, adm1: new Map(), adm2: new Map(), adm1Index: new Set(), adm2Index: new Set(), countries: [], byId: new Map() };
 
+  // 원본 데이터의 어색한 한국어 국가명 보정
+  const NAME_FIX = { CHN: "중국", PRK: "북한", TUR: "튀르키예", TWN: "대만", AUS: "호주", NCL: "뉴칼레도니아", VAT: "바티칸" };
   function prepTopo(topo) {
     const name = Object.keys(topo.objects)[0];
     for (const g of topo.objects[name].geometries) {
       const p = g.properties || (g.properties = {});
+      if (name === "countries" && NAME_FIX[p.id]) p.ko = NAME_FIX[p.id];
       p.ko = p.ko || p.en || p.id || "?";
       p.en = p.en || p.ko;
     }
@@ -79,7 +89,9 @@
   }
 
   function featuresAt(entry, detail) {
-    if (entry.cache && entry.cache.d === detail) return entry.cache.f;
+    if (!entry.cache) entry.cache = new Map();
+    const hit = entry.cache.get(detail);
+    if (hit) return hit.f;
     let feats;
     if (detail >= 100) feats = entry.full;
     else {
@@ -99,10 +111,11 @@
       feats = topojson.feature(t, t.objects[entry.name]).features;
       feats.forEach((f) => rewind(f.geometry));
     }
-    entry.cache = { d: detail, f: feats, byId: new Map(feats.map((f) => [f.properties.id, f])) };
+    if (entry.cache.size > 4) entry.cache.delete(entry.cache.keys().next().value);
+    entry.cache.set(detail, { f: feats, byId: new Map(feats.map((f) => [f.properties.id, f])) });
     return feats;
   }
-  const featAt = (entry, id) => { featuresAt(entry, S.detail); return entry.cache.byId.get(id); };
+  const featAt = (entry, id, det = S.detail) => { featuresAt(entry, det); return entry.cache.get(det).byId.get(id); };
 
   async function loadJSON(url) {
     const r = await fetch(url);
@@ -273,15 +286,16 @@
     const pad = Math.round(Math.min(W, H) * 0.05);
     const ext = [[pad, pad], [W - pad, H - pad]];
     const round = S.shape === "round";
-    const ctxDetail = Math.max(S.detail, 70);
+    const det = effDetail();
+    const ctxDetail = Math.max(det, 70);
     let unitFeats = [], ctxFeats = [];
 
     if (view.level === "world") {
-      const feats = featuresAt(data.world, S.detail).filter((f) => S.antarctica || f.properties.ct !== "AN");
+      const feats = featuresAt(data.world, det).filter((f) => S.antarctica || f.properties.ct !== "AN");
       projection = d3.geoMercator().rotate([-10, 0]).precision(0.3).fitExtent(ext, extentObj(WORLD_EXT));
       unitFeats = feats.map((f) => ({ f, lv: "c", id: f.properties.id, cc: f.properties.id, name: f.properties.ko, group: f.properties.ct }));
     } else if (view.level === "continent") {
-      const worldF = featuresAt(data.world, S.detail);
+      const worldF = featuresAt(data.world, det);
       if (view.ct === "AN") {
         projection = d3.geoAzimuthalEqualArea().rotate([0, 90]).precision(0.3).fitExtent(ext, data.countries.find((f) => f.properties.ct === "AN"));
       } else {
@@ -296,22 +310,29 @@
       const cf = data.byId.get(view.cc);
       const fit = S.overseas ? cf.geometry : mainland(cf.geometry);
       projection = d3.geoMercator().rotate([-centerLon(fit), 0]).precision(0.3).fitExtent(ext, fit);
-      unitFeats = featuresAt(data.adm1.get(view.cc), S.detail).map((f) => ({ f, lv: "a1", id: f.properties.id, cc: view.cc, name: f.properties.ko }));
+      unitFeats = featuresAt(data.adm1.get(view.cc), det).map((f) => ({ f, lv: "a1", id: f.properties.id, cc: view.cc, name: f.properties.ko }));
       ctxFeats = featuresAt(data.world, ctxDetail).filter((f) => f.properties.id !== view.cc).map((f) => ({ f, lv: "c", id: f.properties.id, cc: f.properties.id }));
     } else {
       const a1f = data.adm1.get(view.cc).byId.get(view.a1);
       const fit = S.overseas ? a1f.geometry : mainland(a1f.geometry);
       projection = d3.geoMercator().rotate([-centerLon(fit), 0]).precision(0.3).fitExtent(ext, fit);
-      unitFeats = featuresAt(data.adm2.get(view.a1), S.detail).map((f) => ({ f, lv: "a2", id: f.properties.id, cc: view.cc, a1: view.a1, name: f.properties.ko }));
-      ctxFeats = featuresAt(data.adm1.get(view.cc), ctxDetail).filter((f) => f.properties.id !== view.a1).map((f) => ({ f, lv: "a1", id: f.properties.id, cc: view.cc }))
-        .concat(featuresAt(data.world, ctxDetail).filter((f) => f.properties.id !== view.cc).map((f) => ({ f, lv: "c", id: f.properties.id, cc: f.properties.id })));
+      unitFeats = featuresAt(data.adm2.get(view.a1), det).map((f) => ({ f, lv: "a2", id: f.properties.id, cc: view.cc, a1: view.a1, name: f.properties.ko }));
+      const nb = new Set(view.nb);
+      ctxFeats = view.nb.flatMap((a) => featuresAt(data.adm2.get(a), ctxDetail).map((f) => ({ f, lv: "a2", id: f.properties.id, cc: view.cc, a1: a })))
+        .concat(featuresAt(data.adm1.get(view.cc), ctxDetail).filter((f) => f.properties.id !== view.a1 && !nb.has(f.properties.id)).map((f) => ({ f, lv: "a1", id: f.properties.id, cc: view.cc })))
+        .concat(featuresAt(data.world, ctxDetail).filter((f) => f.properties.id !== view.cc).map((f) => ({ f, lv: "c", id: f.properties.id, cc: f.properties.id })))
+        .reverse();
     }
+    // 현재 확대 상태를 투영에 반영해, 보이는 범위만 확대 배율에 맞는 해상도로 그린다
+    const [tx, ty] = projection.translate();
+    projection.scale(projection.scale() * zt.k).translate([tx * zt.k + zt.x, ty * zt.k + zt.y]);
+    baked = zt;
     projection.clipExtent([[-2, -2], [W + 2, H + 2]]);
     geoPath = d3.geoPath(projection, rec);
 
     const m = { W, H, round, units: [], ctx: [], ovl: [], under: null };
     // 시 경계와 도·주 경계는 출처가 달라 틈이 생기므로 도·주 모양을 밑에 깔아 메운다
-    if (view.level === "region") {
+    if (view.level === "region" && !view.nb.length) {
       const a1g = featuresAt(data.adm1.get(view.cc), ctxDetail).find((f) => f.properties.id === view.a1);
       if (a1g) m.under = { d: pathD(a1g.geometry, round), color: fillFor("a1", view.a1, view.cc) };
     }
@@ -333,7 +354,7 @@
     // 다른 단계에서 고른 곳(더 깊은 단계)을 위에 덮어 그림
     const ovl = [...sel.values()].filter((s) => !shown.has(skey(s.lv, s.id))).sort((a, b) => DEPTH[a.lv] - DEPTH[b.lv]);
     for (const s of ovl) {
-      const g = selGeom(s);
+      const g = selGeom(s, det);
       if (!g) continue;
       const d = pathD(g.geometry, round);
       if (d) m.ovl.push({ ...s, d, geom: g.geometry, color: S.palette[s.ci] });
@@ -343,10 +364,10 @@
     computeLabels();
     paint();
   }
-  function selGeom(s) {
-    if (s.lv === "c") return featAt(data.world, s.id);
-    if (s.lv === "a1") return data.adm1.has(s.cc) ? featAt(data.adm1.get(s.cc), s.id) : null;
-    return data.adm2.has(s.a1) ? featAt(data.adm2.get(s.a1), s.id) : null;
+  function selGeom(s, det) {
+    if (s.lv === "c") return featAt(data.world, s.id, det);
+    if (s.lv === "a1") return data.adm1.has(s.cc) ? featAt(data.adm1.get(s.cc), s.id, det) : null;
+    return data.adm2.has(s.a1) ? featAt(data.adm2.get(s.a1), s.id, det) : null;
   }
 
   // 너무 작아 보이지 않는 선택 지역은 점으로 표시
@@ -362,29 +383,47 @@
   const dotted = (key, k) => model.markers.some((mk) => mk.key === key && tiny(mk, k));
   const markerSVG = (mk, x, y) => `<circle cx="${f1(x)}" cy="${f1(y)}" r="4.5" fill="${mk.color}" stroke="#ffffff" stroke-width="1.5"/>`;
 
+  // 글자 폭 추정(한글·한자는 1em, 라틴 0.6em)
+  const textW = (t, fs) => [...t].reduce((w, ch) => w + (ch.charCodeAt(0) > 0x2e80 ? fs : fs * 0.62), 0);
+  function bestPoly(geom) {
+    let best = null, ba = -1;
+    const gp = d3.geoPath(projection);
+    for (const c of polysOf(geom)) { const g = { type: "Polygon", coordinates: c }; const a = gp.area(g); if (a > ba) { ba = a; best = g; } }
+    if (!best) return null;
+    const [[x0, y0], [x1, y1]] = gp.bounds(best), c = gp.centroid(best);
+    return isFinite(c[0]) ? { x: c[0], y: c[1], area: ba, w: x1 - x0, h: y1 - y0 } : null;
+  }
+  // 이름표: '자동'은 글자가 들어갈 만큼 커지면 표시(확대하면 더 많이 보임), 겹치면 생략
   function computeLabels() {
     const m = model;
     m.labels = [];
     if (S.labels === "none") return;
-    const fs = Math.round(Math.max(10, Math.min(15, Math.min(m.W, m.H) * 0.02)));
-    const push = (geom, text, color, key) => { const p = labelPoint(geom); if (p) m.labels.push({ x: p.x, y: p.y, text, color, fs, area: p.area, key }); };
-    if (S.labels === "all") {
-      if (view.level === "world") {
-        const t = data.world.topo;
-        for (const c of CONT_ORDER) {
-          if (c === "AN" && !S.antarctica) continue;
-          push(topojson.merge(t, t.objects[data.world.name].geometries.filter((g) => g.properties.ct === c)), CONT[c].ko, null, "ct:" + c);
-        }
-      } else {
-        const seen = new Set();
-        for (const u of m.units) { if (!seen.has(u.id)) { seen.add(u.id); push(u.geom, u.name, u.color, skey(u.lv, u.id)); } }
-      }
-    } else {
-      const seen = new Set();
-      for (const u of m.units) if (u.color && selColor(u.lv, u.id) && !seen.has(u.id)) { seen.add(u.id); push(u.geom, u.name, u.color, skey(u.lv, u.id)); }
-      for (const c of m.ctx) if (c.color) push(c.f.geometry, c.name, c.color, skey(c.lv, c.id));
-      for (const o of m.ovl) push(o.geom, o.name, o.color, skey(o.lv, o.id));
+    const out = [], placed = [];
+    const tryPlace = (geom, text, opt) => {
+      const b = bestPoly(geom);
+      if (!b) return;
+      const fs = opt.fs, tw = textW(text, fs);
+      const fits = opt.force || (b.w >= tw * 0.9 && b.h >= fs * 1.3 && b.area >= tw * fs * 1.6);
+      if (!fits) return;
+      const r = [b.x - tw / 2 - 2, b.y - fs / 2 - 1, b.x + tw / 2 + 2, b.y + fs / 2 + 1];
+      if (r[2] < 0 || r[0] > m.W || r[3] < 0 || r[1] > m.H) return;
+      if (placed.some((q) => r[0] < q[2] && r[2] > q[0] && r[1] < q[3] && r[3] > q[1])) return;
+      placed.push(r);
+      out.push({ x: b.x, y: b.y, text, color: opt.color || null, muted: !!opt.muted, fs, area: b.area, key: opt.key });
+    };
+    const seen = new Set();
+    // 1) 선택한 곳은 항상 이름 표시
+    for (const u of m.units) if (selColor(u.lv, u.id) && !seen.has(u.id)) { seen.add(u.id); tryPlace(u.geom, u.name, { fs: 13, color: u.color, key: skey(u.lv, u.id), force: true }); }
+    for (const c of m.ctx) if (c.color) tryPlace(c.f.geometry, c.name, { fs: 12, color: c.color, key: skey(c.lv, c.id), force: true });
+    for (const o of m.ovl) tryPlace(o.geom, o.name, { fs: 12, color: o.color, key: skey(o.lv, o.id), force: true });
+    if (S.labels === "auto") {
+      // 2) 현재 단계 지역(큰 곳부터), 3) 주변 지역은 흐리게
+      const us = m.units.filter((u) => !seen.has(u.id) && (seen.add(u.id), true)).map((u) => ({ u, a: d3.geoPath(projection).area(u.geom) })).sort((x, y) => y.a - x.a);
+      for (const { u } of us) tryPlace(u.geom, u.name, { fs: 12, color: u.color, key: skey(u.lv, u.id) });
+      const cs = m.ctx.filter((c) => !c.color).map((c) => ({ c, a: d3.geoPath(projection).area(c.f.geometry) })).sort((x, y) => y.a - x.a);
+      for (const { c } of cs) tryPlace(c.f.geometry, c.name, { fs: 11, muted: true, key: skey(c.lv, c.id) });
     }
+    m.labels = out;
   }
 
   function lum(hex) {
@@ -399,8 +438,8 @@
   const ovlAttrs = (o) => `fill="${o.color}" stroke="${S.stroke}" stroke-width="${S.strokeW}" ${joinAttr()}`;
 
   function labelSVG(l, x, y) {
-    const fill = textOn(l.color || S.fill), halo = fill === "#ffffff" ? "#1b2430" : "#ffffff";
-    return `<text x="${f1(x)}" y="${f1(y)}" font-family="Malgun Gothic, Apple SD Gothic Neo, sans-serif" font-size="${l.fs}" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="${fill}" stroke="${halo}" stroke-width="2.6" stroke-opacity="0.55" paint-order="stroke">${esc(l.text)}</text>`;
+    const fill = l.muted ? textOn(S.bg) : textOn(l.color || S.fill), halo = fill === "#ffffff" ? "#1b2430" : "#ffffff";
+    return `<text x="${f1(x)}" y="${f1(y)}" font-family="Malgun Gothic, Apple SD Gothic Neo, sans-serif" font-size="${l.fs}" font-weight="${l.muted ? 500 : 700}" text-anchor="middle" dominant-baseline="central" fill="${fill}"${l.muted ? ' fill-opacity="0.7"' : ""} stroke="${halo}" stroke-width="2.4" stroke-opacity="${l.muted ? 0.3 : 0.5}" paint-order="stroke">${esc(l.text)}</text>`;
   }
   function pinSVG(p, xy, extra = "") {
     const s = p.size * 1.25;
@@ -416,7 +455,7 @@
     svg.setAttribute("viewBox", `0 0 ${m.W} ${m.H}`);
     let h = `<rect x="0" y="0" width="${m.W}" height="${m.H}" fill="transparent"/><g id="vp">`;
     if (m.ctx.length) h += `<g id="ctx">` + m.ctx.map((c, i) => `<path class="ctx" data-i="${i}" d="${c.d}" ${ctxAttrs(c)}><title>${esc(c.name)}</title></path>`).join("") + `</g>`;
-    if (m.under) h += `<path class="ovl" d="${m.under.d}" fill="${m.under.color || S.fill}" stroke="none"/>`;
+    if (m.under) h += `<path class="ovl" d="${m.under.d}" fill="${m.under.color || S.fill}"${m.under.color ? "" : ' fill-opacity="0.28"'} stroke="none"/>`;
     h += `<g id="units">` + m.units.map((u, i) => `<path class="unit" data-i="${i}" data-g="${esc(view.level === "world" ? u.group : u.id)}" d="${u.d}" ${unitAttrs(u)}><title>${esc(u.name)}</title></path>`).join("") + `</g>`;
     if (m.ovl.length) h += `<g id="ovl">` + m.ovl.map((o) => `<path class="ovl" d="${o.d}" ${ovlAttrs(o)}/>`).join("") + `</g>`;
     h += `</g><g id="labels" pointer-events="none"></g><g id="pins"></g>`;
@@ -428,10 +467,10 @@
   function applyZoom() {
     const vp = svg.querySelector("#vp");
     if (!vp) return;
-    vp.setAttribute("transform", zt.toString());
-    svg.querySelector("#labels").innerHTML = model.markers.filter((mk) => tiny(mk, zt.k)).map((mk) => markerSVG(mk, zt.applyX(mk.x), zt.applyY(mk.y))).join("") + model.labels
-      .filter((l) => S.labels !== "all" || l.area * zt.k * zt.k > l.text.length * l.fs * l.fs * 0.9)
-      .map((l) => labelSVG(l, zt.applyX(l.x), zt.applyY(l.y) - (dotted(l.key, zt.k) ? l.fs : 0))).join("");
+    const R = rel();
+    vp.setAttribute("transform", R.toString());
+    svg.querySelector("#labels").innerHTML = model.markers.filter((mk) => tiny(mk, R.k)).map((mk) => markerSVG(mk, R.applyX(mk.x), R.applyY(mk.y))).join("") + model.labels
+      .map((l) => labelSVG(l, R.applyX(l.x), R.applyY(l.y) - (dotted(l.key, R.k) ? l.fs : 0))).join("");
     paintPins();
   }
 
@@ -442,7 +481,8 @@
       const xy = projection([p.lon, p.lat]);
       if (!xy) return "";
       const ring = p === activePin ? `<circle class="pin-ring" cx="0" cy="-12" r="15"/>` : "";
-      return pinSVG(p, [zt.applyX(xy[0]), zt.applyY(xy[1])], `class="pin" data-pin="${p.id}"`).replace(/<\/g>$/, ring + "</g>");
+      const R = rel();
+      return pinSVG(p, [R.applyX(xy[0]), R.applyY(xy[1])], `class="pin" data-pin="${p.id}"`).replace(/<\/g>$/, ring + "</g>");
     }).join("");
   }
 
@@ -451,7 +491,13 @@
     .scaleExtent([1, 60])
     .clickDistance(6)
     .filter((e) => !e.target.closest(".pin") && (!e.button || e.type === "wheel"))
-    .on("zoom", (e) => { zt = e.transform; applyZoom(); });
+    .on("zoom", (e) => { zt = e.transform; applyZoom(); })
+    .on("end", () => {
+      clearTimeout(rebakeT);
+      if (busy || (zt.k === baked.k && zt.x === baked.x && zt.y === baked.y)) return;
+      rebakeT = setTimeout(() => { if (!busy) render(); }, 90);
+    });
+  let rebakeT = 0;
   function resetZoom(animate) {
     const s = d3.select(svg);
     (animate ? s.transition().duration(250) : s).call(zoom.transform, d3.zoomIdentity);
@@ -464,7 +510,7 @@
   }
   function transformFor(b, fill = 0.9, maxK = 60) {
     const w = Math.max(b[2] - b[0], 1), h = Math.max(b[3] - b[1], 1);
-    const k = Math.max(1, Math.min(maxK, fill * Math.min(model.W / w, model.H / h)));
+    const k = Math.max(1 / baked.k, Math.min(maxK / baked.k, fill * Math.min(model.W / w, model.H / h)));
     return d3.zoomIdentity.translate(model.W / 2, model.H / 2).scale(k).translate(-(b[0] + w / 2), -(b[1] + h / 2));
   }
   // 누른 곳으로 확대한 뒤 한 단계 아래 지도로 교체
@@ -472,14 +518,15 @@
     const b = bboxOf(els);
     if (!b || busy) { then(); return; }
     busy = true;
-    d3.select(svg).transition().duration(420).ease(d3.easeCubicInOut).call(zoom.transform, transformFor(b))
+    d3.select(svg).transition().duration(420).ease(d3.easeCubicInOut).call(zoom.transform, toAbs(transformFor(b)))
       .on("end interrupt", async () => { try { await then(); } finally { busy = false; } });
   }
   function zoomToSmall(id) {
     const els = [...svg.querySelectorAll(`#units .unit[data-g="${CSS.escape(id)}"]`)];
     const b = bboxOf(els);
-    if (!b || (b[2] - b[0]) * zt.k > 30 || (b[3] - b[1]) * zt.k > 30) return;
-    d3.select(svg).transition().duration(350).call(zoom.transform, transformFor(b, 0.3, 30));
+    const R = rel();
+    if (!b || (b[2] - b[0]) * R.k > 30 || (b[3] - b[1]) * R.k > 30) return;
+    d3.select(svg).transition().duration(350).call(zoom.transform, toAbs(transformFor(b, 0.3, 30)));
   }
 
   // ---------- 탐색 ----------
@@ -489,15 +536,27 @@
         if (!data.adm1Index.has(v.cc)) { toast(`${countryName(v.cc)}: 도·주 구분 데이터가 없습니다.`); return; }
         await ensureAdm1(v.cc);
       }
-      if (v.level === "region") await ensureAdm2(v.cc, v.a1);
+      if (v.level === "region") {
+        await ensureAdm2(v.cc, v.a1);
+        // 이웃 도·주의 시 경계도 같은 출처로 받아 주변을 그린다 (경계 어긋남 방지)
+        const a1e = data.adm1.get(v.cc), me = a1e.byId.get(v.a1);
+        const [[w, s0], [e, n]] = d3.geoBounds(me.geometry), dx = (e - w) * 0.6 + 0.3, dy = (n - s0) * 0.6 + 0.3;
+        v.nb = a1e.full.filter((f) => f.properties.id !== v.a1 && hasCities(f.properties.id)).filter((f) => {
+          const [[w2, s2], [e2, n2]] = d3.geoBounds(f.geometry);
+          return !(e2 < w - dx || w2 > e + dx || n2 < s0 - dy || s2 > n + dy);
+        }).map((f) => f.properties.id).slice(0, 12);
+        await Promise.all(v.nb.map((a) => ensureAdm2(v.cc, a).catch(() => null)));
+      }
     } catch { toast("지도 데이터를 불러오지 못했습니다. 연결을 확인해 주세요."); return; }
     view.level = v.level;
     view.cc = v.level === "country" || v.level === "region" ? v.cc : null;
     view.a1 = v.level === "region" ? v.a1 : null;
+    view.nb = v.level === "region" ? (v.nb || []).filter((a) => data.adm2.has(a)) : [];
     view.ct = v.level === "world" ? null : v.ct || (view.cc && data.byId.get(view.cc).properties.ct);
     $("search").value = "";
     if (push) { const k = hashKey(); history.replaceState(null, "", k ? "#" + k : location.pathname + location.search); }
-    zt = d3.zoomIdentity;
+    zt = d3.zoomIdentity; baked = d3.zoomIdentity;
+    clearTimeout(rebakeT);
     d3.select(svg).interrupt().call(zoom.transform, d3.zoomIdentity);
     renderCrumbs(); renderList(); render();
   }
@@ -525,6 +584,7 @@
     toggleSel(selInfo({ ...u, ko: u.name }));
   }
   function onCtx(c) {
+    if (c.lv === "a2") return navigate({ level: "region", cc: c.cc, a1: c.a1 });
     if (c.lv === "a1") { if (hasCities(c.id)) return navigate({ level: "region", cc: c.cc, a1: c.id }); return navigate({ level: "country", cc: c.cc }); }
     goCountry(c.id);
   }
@@ -630,7 +690,7 @@
   }
   function dupPin(p) {
     const xy = projection([p.lon, p.lat]);
-    const ll = projection.invert([xy[0] + 18 / zt.k, xy[1] + 10 / zt.k]);
+    const ll = projection.invert([xy[0] + 18 / rel().k, xy[1] + 10 / rel().k]);
     addPin(ll[0], ll[1], p);
   }
 
@@ -665,13 +725,13 @@
         if (us.length) o += `<g id="${CONT[c].ko}">` + us.map((u) => `<path id="${idOf(u.name)}" d="${u.d}" ${unitAttrs(u)}/>`).join("") + `</g>\n`;
       }
     } else if (units.length) {
-      if (m.under && !onlySel) o += `<path id="바탕" d="${m.under.d}" fill="${m.under.color || S.fill}"/>\n`;
+      if (m.under && !onlySel && m.under.color) o += `<path id="바탕" d="${m.under.d}" fill="${m.under.color}"/>\n`;
       o += `<g id="지역">` + units.map((u) => `<path id="${idOf(u.name)}" d="${u.d}" ${unitAttrs(u)}/>`).join("") + `</g>\n`;
     }
     if (ovl.length) o += `<g id="선택">` + ovl.map((x) => `<path id="${idOf(x.name)}" d="${x.d}" ${ovlAttrs(x)}/>`).join("") + `</g>\n`;
     const mks = m.markers.filter((mk) => tiny(mk, 1) && inView(mk.x, mk.y));
     if (mks.length) o += `<g id="위치점">` + mks.map((mk) => markerSVG(mk, mk.x, mk.y)).join("") + `</g>\n`;
-    const labels = m.labels.filter((l) => inView(l.x, l.y) && (S.labels !== "all" || l.area > l.text.length * l.fs * l.fs * 0.9));
+    const labels = m.labels.filter((l) => inView(l.x, l.y));
     if (labels.length) o += `<g id="이름">` + labels.map((l) => labelSVG(l, l.x, l.y - (dotted(l.key, 1) ? l.fs : 0))).join("") + `</g>\n`;
     const ps = pins.map((p) => [p, projection([p.lon, p.lat])]).filter(([, xy]) => xy && inView(xy[0], xy[1]));
     if (ps.length) o += `<g id="핀">` + ps.map(([p, xy]) => pinSVG(p, xy)).join("") + `</g>\n`;
@@ -870,7 +930,7 @@
     // 지도
     d3.select(svg).call(zoom).on("dblclick.zoom", null);
     let drag = null, press = null, suppressClick = false;
-    const pt = (e) => { const r = svg.getBoundingClientRect(); return zt.invert([(e.clientX - r.left) * (model.W / r.width), (e.clientY - r.top) * (model.H / r.height)]); };
+    const pt = (e) => { const r = svg.getBoundingClientRect(); return rel().invert([(e.clientX - r.left) * (model.W / r.width), (e.clientY - r.top) * (model.H / r.height)]); };
     svg.addEventListener("pointerdown", (e) => {
       const pg = e.target.closest(".pin");
       if (pg) {

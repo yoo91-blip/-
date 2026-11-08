@@ -29,9 +29,17 @@ export const LEVELS = {
 const USE_SIMPLIFIED = new Set(["ESP", "IND", "ROU", "MEX"]);
 const INTERVAL_M = 80; // 단순화 허용 오차(미터)
 
-const only = process.argv.slice(2);
-const countries = Object.keys(LEVELS).filter((c) => !only.length || only.includes(c));
+// --auto: 나머지 국가는 geoBoundaries 단순화본에서 '시' 단계를 자동 선택
+const AUTO = process.argv.includes("--auto");
+const only = process.argv.slice(2).filter((a) => !a.startsWith("--"));
+const AUTO_FILE = path.join(ROOT, "tools", "levels-auto.json");
+const autoLevels = fs.existsSync(AUTO_FILE) ? JSON.parse(fs.readFileSync(AUTO_FILE, "utf8")) : {};
+// 도·주 데이터가 이미 시/카운티 수준이라 더 내려가지 않는 나라
+const LEAF_OK = new Set(["GBR", "ITA", "SVN", "IRL"]);
+let countries = Object.keys(LEVELS).filter((c) => !only.length || only.includes(c));
 fs.mkdirSync(WORK, { recursive: true });
+
+function tryFetch(url, file) { try { fetchTo(url, file); return true; } catch { try { fs.rmSync(file, { force: true }); } catch {} return false; } }
 
 const readJSON = (f) => JSON.parse(fs.readFileSync(f, "utf8"));
 function fetchTo(url, file) {
@@ -105,10 +113,34 @@ for (const f of readJSON(NE_ADM1).features) {
   neBy.get(cc).push({ ko: f.properties.name_ko, id: f.properties.adm1_code, geom: f.geometry, c: d3.geoCentroid(f.geometry), b: d3.geoBounds(f.geometry) });
 }
 
+if (AUTO) {
+  const ne1 = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/data/adm1-index.json"), "utf8"));
+  const todo = ne1.filter((c) => !LEVELS[c] && !LEAF_OK.has(c) && (!only.length || only.includes(c)));
+  for (const cc of todo) {
+    if (autoLevels[cc] !== undefined) continue;
+    const n1 = (neBy.get(cc) || []).length;
+    let pick = 0;
+    for (const l of [2, 3]) {
+      const f = path.join(WORK, `${cc}-${l}.geojson`);
+      if (!tryFetch(`${GB}/${cc}/ADM${l}/geoBoundaries-${cc}-ADM${l}_simplified.geojson`, f)) break;
+      const n = readJSON(f).features.length;
+      if (n >= Math.max(n1 * 1.5, n1 + 8) && n <= 9000) { pick = l; break; }
+    }
+    autoLevels[cc] = pick;
+    console.log(`[auto] ${cc}: 도·주 ${n1} → ${pick ? "ADM" + pick : "없음"}`);
+    fs.writeFileSync(AUTO_FILE, JSON.stringify(autoLevels, null, 1));
+  }
+  countries = Object.keys(autoLevels).filter((c) => autoLevels[c] && (!only.length || only.includes(c)));
+  for (const c of countries) { LEVELS[c] = autoLevels[c]; USE_SIMPLIFIED.add(c); }
+}
+
 const idxFile = path.join(ROOT, "docs/data/adm2-index.json");
 const index = fs.existsSync(idxFile) ? readJSON(idxFile) : {};
 
 for (const cc of countries) {
+  try { buildOne(cc); } catch (e) { console.log(`  ${cc}: 실패 (${e.message.split("\n")[0]})`); }
+}
+function buildOne(cc) {
   const lvl = LEVELS[cc];
   let srcL, srcP;
   if (cc === "KOR") ({ l2: srcL, l1: srcP } = prepareKorea());
