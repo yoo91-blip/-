@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611241300">
+<link rel="stylesheet" href="style.css?v=202611241700">
 </head>
 <body>
 <div class="app" id="app">
@@ -114,8 +114,6 @@
             <button data-label="none" data-i18n="none">없음</button>
           </div>
         </div>
-        <label class="srow check"><input type="checkbox" id="optContext"> <span data-i18n="optContext">주변 국가 표시</span></label>
-        <label class="srow check"><input type="checkbox" id="optOverseas"> <span data-i18n="optOverseas">해외 영토·원거리 섬 포함</span></label>
         <label class="srow check"><input type="checkbox" id="optAntarctica"> <span data-i18n="optAntarctica">세계지도에 남극 표시</span></label>
         <label class="srow check"><input type="checkbox" id="optBg"> <span data-i18n="optBg">다운로드에 배경색 포함</span></label>
       </section>
@@ -136,6 +134,7 @@
         </button>
       </div>
       <div class="tgroup dl">
+        <button class="tbtn icon" id="helpBtn" data-i18n-title="help" data-i18n-aria="help" title="사용법" aria-label="사용법">?</button>
         <button class="tbtn" id="dlSel" data-i18n="dlSel" data-i18n-title="dlSelTitle">칠한 곳만</button>
         <button class="tbtn primary" id="dlAll" data-i18n-aria="dlAll" aria-label="SVG 다운로드">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2"/></svg>
@@ -159,9 +158,6 @@
         </div>
       </div>
       <div class="zoomctl" role="group" data-i18n-aria="zoomGrp" aria-label="확대 축소">
-        <button id="zoomUp" data-i18n-aria="up" data-i18n-title="up" aria-label="상위 단계로" title="상위 단계로">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6m0 0-5 5m5-5 5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-        </button>
         <button id="zoomIn" data-i18n-aria="zin" aria-label="확대">+</button>
         <button id="zoomOut" data-i18n-aria="zout" aria-label="축소">−</button>
         <button id="zoomFit" data-i18n-aria="fit" data-i18n-title="fit" aria-label="전체 보기" title="전체 보기">
@@ -170,6 +166,7 @@
       </div>
       <div class="loading" id="loading" hidden data-i18n="loading">지도 불러오는 중…</div>
       <div class="hint" id="hint"></div>
+      <div class="lodbusy" id="lodBusy" hidden></div>
 
       <div class="panel" id="morePanel" hidden>
         <div class="panel-head"><b data-i18n="export">내보내기</b><button class="x" data-close="morePanel" data-i18n-aria="close" aria-label="닫기">×</button></div>
@@ -177,6 +174,7 @@
         <button class="menu" id="dlPng" data-i18n="png">PNG 이미지 (고해상도)</button>
         <button class="menu" id="dlSelPng" data-i18n="pngSel">PNG · 칠한 곳만</button>
         <button class="menu" id="copySvg" data-i18n="copy">SVG 코드 복사</button>
+        <button class="menu" id="helpM" data-i18n="help">사용법</button>
         <p class="note" data-i18n="exportNote">지금 화면에 보이는 범위를 저장합니다. 다른 단계에서 고른 곳도 함께 들어갑니다.</p>
         <p class="note" data-i18n-html="pptNote">PPT: 삽입 › 그림 › SVG 파일 선택 → 우클릭 <b>도형으로 변환</b> → <b>그룹 해제</b>하면 지역별로 쪼개집니다. (Microsoft 365 / PowerPoint 2019 이상)</p>
       </div>
@@ -200,11 +198,18 @@
   <div class="cgrid" id="cgrid"></div>
   <label class="ccustom"><span data-i18n="custom">직접 선택</span><input type="color" id="cCustom"></label>
 </div>
+<div class="modal" id="helpModal" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="modal-card">
+    <div class="panel-head"><b id="helpTitle" data-i18n="help">사용법</b><button class="x" id="helpClose" data-i18n-aria="close" aria-label="닫기">×</button></div>
+    <ol class="help" id="helpBody"></ol>
+    <button class="tbtn primary" id="helpOk" data-i18n="helpOk">시작하기</button>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="vendor/d3.min.js"></script>
 <script src="vendor/topojson-client.min.js"></script>
 <script src="vendor/topojson-simplify.min.js"></script>
-<script src="app.js?v=202611241300"></script>
+<script src="app.js?v=202611241700"></script>
 </body>
 </html>
