@@ -101,6 +101,8 @@ function prepareKorea() {
   return { l2, l1 };
 }
 
+// 해안가라 위치로 영문명을 못 찾는 한국 시군구
+const KR_EN_FIX = { 동구: "Dong-gu", 서구: "Seo-gu", 강서구: "Gangseo-gu", 연수구: "Yeonsu-gu", 옹진군: "Ongjin County", 안산시: "Ansan City", 시흥시: "Siheung City", 부안군: "Buan County", 통영시: "Tongyeong City", 목포시: "Mokpo City", 여수시: "Yeosu City", 고흥군: "Goheung County" };
 const krNorm = (s) => { const t = String(s || "").replace(/(특별자치도|특별자치시|특별시|광역시|도)$/, ""); return { 전북: "전라북", 강원: "강원" }[t] || t; };
 
 console.log("Natural Earth 도·주 읽는 중…");
@@ -173,6 +175,12 @@ function buildOne(cc) {
 
   // 3) 시 → 상위 경계(정확히 포개짐) → 도·주
   const out = [];
+  let krEn = null;
+  if (cc === "KOR") {
+    const kf = path.join(WORK, "kr-muni.json");
+    fetchTo("https://raw.githubusercontent.com/southkorea/southkorea-maps/master/kostat/2013/json/skorea_municipalities_geo_simple.json", kf);
+    krEn = readJSON(kf).features.map((k) => ({ en: k.properties.name_eng, geom: rewind(k.geometry) }));
+  }
   readJSON(simp).features.forEach((f, i) => {
     if (!f.geometry) return;
     rewind(f.geometry);
@@ -181,7 +189,11 @@ function buildOne(cc) {
     const p = vote(f.geometry, cands.length ? cands : parents, 36);
     if (!p) return;
     const name = f.properties.shapeName || `#${i}`;
-    out.push({ type: "Feature", properties: { id: `${cc}-${f.properties.shapeID || i}`, ko: name, en: name, p: p.id }, geometry: f.geometry });
+    let en = name;
+    // 한국 시군구는 영문 이름을 2013 통계청 경계(southkorea-maps)에서 위치로 가져온다
+    if (krEn) { const pt = samplePoints(f.geometry, 9)[0]; const k = krEn.find((k) => d3.geoContains(k.geom, pt)); if (k) en = k.en.replace(/-(si|gun|gu)$/, (m, x) => ({ si: " City", gun: " County", gu: "-gu" })[x]); }
+    if (krEn && en === name) en = KR_EN_FIX[name] || name;
+    out.push({ type: "Feature", properties: { id: `${cc}-${f.properties.shapeID || i}`, ko: name, en, p: p.id }, geometry: f.geometry });
   });
   console.log(`  ${cc}: ${out.length}개`);
 

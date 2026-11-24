@@ -5,7 +5,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="대륙·국가·도/주 단위 세계지도를 골라 SVG/PNG로 내려받아 PPT에 바로 넣는 도구">
+<meta name="description" content="Editable world maps for PowerPoint — pick continents, countries, states and cities, then download SVG/PNG. 대륙·국가·도/주·시 단위 세계지도를 SVG/PNG로 내려받아 PPT에 바로 넣는 도구">
 <meta name="theme-color" content="#10161d">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -14,46 +14,50 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="style.css?v=202611081954">
+<link rel="stylesheet" href="style.css?v=202611241300">
 </head>
 <body>
 <div class="app" id="app">
   <aside class="side" id="side">
     <div class="brand">
       <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 4v13.5M15 6.5V20" stroke="currentColor" stroke-width="1.8"/></svg>
-      <div>
-        <div class="brand-name">지도추출기 <span>World</span></div>
-        <div class="brand-sub">대륙 › 국가 › 도·주 › 시</div>
+      <div class="brand-text">
+        <div class="brand-name"><span data-i18n="appName">지도추출기</span> <span class="accent">World</span></div>
+        <div class="brand-sub" data-i18n="brandSub">대륙 › 국가 › 도·주 › 시</div>
+      </div>
+      <div class="seg small langseg" role="radiogroup" aria-label="Language">
+        <button data-lang="ko">한</button>
+        <button data-lang="en">EN</button>
       </div>
     </div>
 
     <div class="sheet-bar" id="sheetBar">
       <span class="grabber" aria-hidden="true"></span>
-      <nav class="crumbs" id="crumbs" aria-label="현재 위치"></nav>
+      <nav class="crumbs" id="crumbs" data-i18n-aria="crumbsAria" aria-label="현재 위치"></nav>
       <button class="sheet-toggle" id="sheetToggle" aria-expanded="false" aria-controls="sideBody" aria-label="목록 열기">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>
       </button>
     </div>
 
     <div class="tabs" role="tablist">
-      <button role="tab" id="tabList" aria-selected="true" aria-controls="paneList">목록</button>
-      <button role="tab" id="tabStyle" aria-selected="false" aria-controls="paneStyle">스타일</button>
+      <button role="tab" id="tabList" aria-selected="true" aria-controls="paneList" data-i18n="tabList">목록</button>
+      <button role="tab" id="tabStyle" aria-selected="false" aria-controls="paneStyle" data-i18n="tabStyle">스타일</button>
     </div>
 
     <div class="side-body" id="sideBody">
       <section class="pane" id="paneList" role="tabpanel" aria-labelledby="tabList">
         <label class="search">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="2"/></svg>
-          <input id="search" type="search" placeholder="국가·지역 검색 (한/영)" autocomplete="off">
+          <input id="search" type="search" data-i18n-ph="searchPh" placeholder="국가·지역 검색 (한/영)" autocomplete="off">
         </label>
         <div class="picked" id="picked" hidden>
-          <div class="picked-head"><span id="pickedTitle">선택한 곳</span><button id="pickedClear" class="link">모두 해제</button></div>
+          <div class="picked-head"><span id="pickedTitle"></span><button id="pickedClear" class="link" data-i18n="clearAll">모두 해제</button></div>
           <div class="chips" id="chips"></div>
         </div>
         <div class="list-head">
-          <span id="listTitle">대륙</span>
+          <span id="listTitle"></span>
           <span class="list-actions">
-            <button id="selAll" class="link">이 단계 모두 칠하기</button>
+            <button id="selAll" class="link" data-i18n="paintAll">이 단계 모두 칠하기</button>
           </span>
         </div>
         <ul class="list" id="list"></ul>
@@ -61,124 +65,146 @@
 
       <section class="pane" id="paneStyle" role="tabpanel" aria-labelledby="tabStyle" hidden>
         <div class="srow">
-          <span>끝단 모양</span>
-          <div class="seg small" role="radiogroup" aria-label="끝단 모양">
-            <button id="shapeRound" role="radio">둥글</button>
-            <button id="shapeAngle" role="radio">각</button>
+          <span data-i18n="language">언어</span>
+          <div class="seg small langseg" role="radiogroup" aria-label="Language">
+            <button data-lang="ko">한국어</button>
+            <button data-lang="en">English</button>
           </div>
         </div>
         <div class="srow">
-          <label for="detail">디테일</label>
-          <div class="seg small" id="detailPresets">
-            <button data-d="100">정밀</button>
-            <button data-d="60">보통</button>
-            <button data-d="25">단순</button>
+          <span data-i18n="shape">끝단 모양</span>
+          <div class="seg small" role="radiogroup" data-i18n-aria="shape" aria-label="끝단 모양">
+            <button id="shapeRound" role="radio" data-i18n="round">둥글</button>
+            <button id="shapeAngle" role="radio" data-i18n="angle">각</button>
           </div>
         </div>
-        <div class="srow"><input type="range" id="detail" min="1" max="100" value="60" aria-label="디테일 세부 조절"><output id="detailOut" class="num">60</output></div>
+        <div class="srow">
+          <label for="detail" data-i18n="detail">디테일</label>
+          <div class="seg small" id="detailPresets">
+            <button data-d="100" data-i18n="precise">정밀</button>
+            <button data-d="60" data-i18n="normal">보통</button>
+            <button data-d="25" data-i18n="simple">단순</button>
+          </div>
+        </div>
+        <div class="srow"><input type="range" id="detail" min="1" max="100" value="60" data-i18n-aria="detail" aria-label="디테일"><output id="detailOut" class="num">60</output></div>
 
-        <h3>칠하기 색</h3>
+        <h3 data-i18n="paintColors">칠하기 색</h3>
         <div class="palette-edit" id="paletteEdit"></div>
 
-        <h3>지도 색</h3>
+        <h3 data-i18n="mapColors">지도 색</h3>
         <div class="srow">
-          <span>프리셋</span>
+          <span data-i18n="preset">프리셋</span>
           <div class="seg small" id="presets">
-            <button data-preset="dark">다크</button>
-            <button data-preset="light">라이트</button>
-            <button data-preset="mono">모노</button>
+            <button data-preset="dark" data-i18n="dark">다크</button>
+            <button data-preset="light" data-i18n="light">라이트</button>
+            <button data-preset="mono" data-i18n="mono">모노</button>
           </div>
         </div>
-        <label class="srow"><span>기본 지역</span><input type="color" id="cFill"></label>
-        <label class="srow"><span>경계선</span><input type="color" id="cStroke"></label>
-        <label class="srow"><span>배경</span><input type="color" id="cBg"></label>
-        <label class="srow"><span>선 두께</span><input type="range" id="strokeW" min="0" max="4" step="0.1"><output id="strokeOut" class="num"></output></label>
+        <div class="srow"><span data-i18n="baseFill">기본 지역</span><button class="cbtn" data-cv="fill" data-i18n-aria="baseFill"><span></span></button></div>
+        <div class="srow"><span data-i18n="stroke">경계선</span><button class="cbtn" data-cv="stroke" data-i18n-aria="stroke"><span></span></button></div>
+        <div class="srow"><span data-i18n="bg">배경</span><button class="cbtn" data-cv="bg" data-i18n-aria="bg"><span></span></button></div>
+        <label class="srow"><span data-i18n="strokeW">선 두께</span><input type="range" id="strokeW" min="0" max="4" step="0.1"><output id="strokeOut" class="num"></output></label>
 
-        <h3>표시</h3>
+        <h3 data-i18n="display">표시</h3>
         <div class="srow">
-          <span>이름</span>
+          <span data-i18n="names">이름</span>
           <div class="seg small" id="labelMode">
-            <button data-label="auto">자동</button>
-            <button data-label="sel">칠한 곳</button>
-            <button data-label="none">없음</button>
+            <button data-label="auto" data-i18n="auto">자동</button>
+            <button data-label="sel" data-i18n="painted">칠한 곳</button>
+            <button data-label="none" data-i18n="none">없음</button>
           </div>
         </div>
-        <label class="srow check"><input type="checkbox" id="optContext"> 주변 국가 표시</label>
-        <label class="srow check"><input type="checkbox" id="optOverseas"> 해외 영토·원거리 섬 포함</label>
-        <label class="srow check"><input type="checkbox" id="optAntarctica"> 세계지도에 남극 표시</label>
-        <label class="srow check"><input type="checkbox" id="optBg"> 다운로드에 배경색 포함</label>
+        <label class="srow check"><input type="checkbox" id="optContext"> <span data-i18n="optContext">주변 국가 표시</span></label>
+        <label class="srow check"><input type="checkbox" id="optOverseas"> <span data-i18n="optOverseas">해외 영토·원거리 섬 포함</span></label>
+        <label class="srow check"><input type="checkbox" id="optAntarctica"> <span data-i18n="optAntarctica">세계지도에 남극 표시</span></label>
+        <label class="srow check"><input type="checkbox" id="optBg"> <span data-i18n="optBg">다운로드에 배경색 포함</span></label>
       </section>
     </div>
-    <p class="side-foot">지도 데이터: Natural Earth (Public Domain) · geoBoundaries (CC BY 4.0) · 한국 시군구: 통계청 SGIS(공공누리 제1유형), vuski/admdongkor (CC BY 4.0)</p>
+    <p class="side-foot" data-i18n="foot">지도 데이터: Natural Earth (Public Domain) · geoBoundaries (CC BY 4.0) · 한국 시군구: 통계청 SGIS(공공누리 제1유형), vuski/admdongkor (CC BY 4.0)</p>
   </aside>
 
   <main class="main">
     <div class="toolbar" id="toolbar">
-      <div class="tools" id="tools" role="toolbar" aria-label="도구">
+      <div class="tools" id="tools" role="toolbar" data-i18n-aria="tools" aria-label="도구">
         <span id="paletteTools" class="palette-tools"></span>
-        <button class="tool" data-tool="erase" title="지우개" aria-label="지우개">
+        <button class="tool" data-tool="erase" data-i18n-title="erase" data-i18n-aria="erase" title="지우개" aria-label="지우개">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 4.5 5.5 5.5-8.5 8.5H6L3.5 16a1.5 1.5 0 0 1 0-2.1zM9 9.5l5.5 5.5M11 18.5h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
         </button>
         <span class="tsep" aria-hidden="true"></span>
-        <button class="tool" data-tool="pin" title="핀 꽂기" aria-label="핀 꽂기">
+        <button class="tool" data-tool="pin" data-i18n-title="pin" data-i18n-aria="pin" title="핀 꽂기" aria-label="핀 꽂기">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="12" cy="10" r="2.2" fill="currentColor"/></svg>
         </button>
       </div>
       <div class="tgroup dl">
-        <button class="tbtn" id="dlSel" title="칠한 지역만 SVG로">칠한 곳만</button>
-        <button class="tbtn primary" id="dlAll" aria-label="SVG 다운로드">
+        <button class="tbtn" id="dlSel" data-i18n="dlSel" data-i18n-title="dlSelTitle">칠한 곳만</button>
+        <button class="tbtn primary" id="dlAll" data-i18n-aria="dlAll" aria-label="SVG 다운로드">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-          <span class="dl-label">SVG 다운로드</span>
+          <span class="dl-label" data-i18n="dlAll">SVG 다운로드</span>
         </button>
-        <button class="tbtn icon" id="moreBtn" aria-expanded="false" aria-controls="morePanel" title="다른 형식">
+        <button class="tbtn icon" id="moreBtn" aria-expanded="false" aria-controls="morePanel" data-i18n-title="more" title="다른 형식">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/></svg>
         </button>
       </div>
     </div>
 
     <div class="stage" id="stage">
-      <svg id="map" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="지도"></svg>
-      <div class="zoomctl" role="group" aria-label="확대 축소">
-        <button id="zoomUp" aria-label="상위 단계로" title="상위 단계로">
+      <svg id="map" xmlns="http://www.w3.org/2000/svg" role="img" data-i18n-aria="map" aria-label="지도"></svg>
+      <div class="pickbar" role="radiogroup" data-i18n-aria="pickAria" aria-label="선택 단위">
+        <span class="pick-label" data-i18n="pickLabel">선택</span>
+        <div class="seg small" id="pickMode">
+          <button data-pick="auto" data-i18n="pickAuto">자동</button>
+          <button data-pick="c" data-i18n="pickC">국가</button>
+          <button data-pick="a1" data-i18n="pickA1">도·주</button>
+          <button data-pick="a2" data-i18n="pickA2">시</button>
+        </div>
+      </div>
+      <div class="zoomctl" role="group" data-i18n-aria="zoomGrp" aria-label="확대 축소">
+        <button id="zoomUp" data-i18n-aria="up" data-i18n-title="up" aria-label="상위 단계로" title="상위 단계로">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V6m0 0-5 5m5-5 5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
         </button>
-        <button id="zoomIn" aria-label="확대">+</button>
-        <button id="zoomOut" aria-label="축소">−</button>
-        <button id="zoomFit" aria-label="전체 보기" title="전체 보기">
+        <button id="zoomIn" data-i18n-aria="zin" aria-label="확대">+</button>
+        <button id="zoomOut" data-i18n-aria="zout" aria-label="축소">−</button>
+        <button id="zoomFit" data-i18n-aria="fit" data-i18n-title="fit" aria-label="전체 보기" title="전체 보기">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
         </button>
       </div>
-      <div class="loading" id="loading" hidden>지도 불러오는 중…</div>
+      <div class="loading" id="loading" hidden data-i18n="loading">지도 불러오는 중…</div>
       <div class="hint" id="hint"></div>
 
       <div class="panel" id="morePanel" hidden>
-        <div class="panel-head"><b>내보내기</b><button class="x" data-close="morePanel" aria-label="닫기">×</button></div>
-        <button class="menu" id="dlSelM">SVG · 칠한 곳만</button>
-        <button class="menu" id="dlPng">PNG 이미지 (고해상도)</button>
-        <button class="menu" id="dlSelPng">PNG · 칠한 곳만</button>
-        <button class="menu" id="copySvg">SVG 코드 복사</button>
-        <p class="note">확대 상태와 관계없이 현재 단계의 지도 전체(또는 칠한 곳)를 저장합니다. 다른 단계에서 고른 곳도 함께 들어갑니다.</p>
-        <p class="note">PPT: 삽입 › 그림 › SVG 파일 선택 → 우클릭 <b>도형으로 변환</b> → <b>그룹 해제</b>하면 지역별로 쪼개집니다. (Microsoft 365 / PowerPoint 2019 이상)</p>
+        <div class="panel-head"><b data-i18n="export">내보내기</b><button class="x" data-close="morePanel" data-i18n-aria="close" aria-label="닫기">×</button></div>
+        <button class="menu" id="dlSelM" data-i18n="svgSel">SVG · 칠한 곳만</button>
+        <button class="menu" id="dlPng" data-i18n="png">PNG 이미지 (고해상도)</button>
+        <button class="menu" id="dlSelPng" data-i18n="pngSel">PNG · 칠한 곳만</button>
+        <button class="menu" id="copySvg" data-i18n="copy">SVG 코드 복사</button>
+        <p class="note" data-i18n="exportNote">지금 화면에 보이는 범위를 저장합니다. 다른 단계에서 고른 곳도 함께 들어갑니다.</p>
+        <p class="note" data-i18n-html="pptNote">PPT: 삽입 › 그림 › SVG 파일 선택 → 우클릭 <b>도형으로 변환</b> → <b>그룹 해제</b>하면 지역별로 쪼개집니다. (Microsoft 365 / PowerPoint 2019 이상)</p>
       </div>
 
       <div class="panel pinpanel" id="pinPanel" hidden>
         <div class="swatches" id="pinColors"></div>
         <div class="pinrow">
-          <label class="pinsize"><span>크기</span><input type="range" id="pinSize" min="0.5" max="3" step="0.1"></label>
-          <label class="chk"><input type="checkbox" id="pinBorder"> 테두리</label>
-          <button class="tbtn small" id="pinDup">복제</button>
-          <button class="tbtn small danger" id="pinDel">삭제</button>
-          <button class="x" id="pinClose" aria-label="핀 편집 닫기">×</button>
+          <label class="pinsize"><span data-i18n="size">크기</span><input type="range" id="pinSize" min="0.5" max="3" step="0.1"></label>
+          <label class="chk"><input type="checkbox" id="pinBorder"> <span data-i18n="border">테두리</span></label>
+          <button class="tbtn small" id="pinDup" data-i18n="dup">복제</button>
+          <button class="tbtn small danger" id="pinDel" data-i18n="del">삭제</button>
+          <button class="x" id="pinClose" data-i18n-aria="close" aria-label="닫기">×</button>
         </div>
       </div>
     </div>
   </main>
+</div>
+
+<div class="colorpop" id="colorPop" hidden role="dialog" aria-modal="false">
+  <div class="panel-head"><b data-i18n="pickColor">색 선택</b><button class="x" id="colorClose" data-i18n-aria="close" aria-label="닫기">×</button></div>
+  <div class="cgrid" id="cgrid"></div>
+  <label class="ccustom"><span data-i18n="custom">직접 선택</span><input type="color" id="cCustom"></label>
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="vendor/d3.min.js"></script>
 <script src="vendor/topojson-client.min.js"></script>
 <script src="vendor/topojson-simplify.min.js"></script>
-<script src="app.js?v=202611081954"></script>
+<script src="app.js?v=202611241300"></script>
 </body>
 </html>

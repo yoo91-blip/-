@@ -63,7 +63,7 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .brand { display: flex; gap: 10px; align-items: center; }
 .brand-mark { width: 30px; height: 30px; color: var(--accent); flex: none; }
 .brand-name { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; }
-.brand-name span { color: var(--accent); }
+.brand-name .accent { color: var(--accent); }
 .brand-sub { font-size: 11.5px; color: var(--muted); letter-spacing: 0.02em; }
 
 .sheet-bar { display: flex; align-items: center; gap: 8px; }
@@ -293,3 +293,41 @@ input[type="color"] { width: 44px; height: 30px; border: 1px solid var(--line); 
   .focusbar { bottom: 10px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ---------- 언어 / 선택 단위 / 색 고르기 ---------- */
+.brand .langseg { margin-left: auto; }
+.brand .langseg button { padding: 2px 8px; }
+.brand-name .accent { color: var(--accent); }
+.langseg button.on { background: var(--accent); color: var(--accent-fg); }
+
+.pickbar {
+  position: absolute; top: 12px; left: calc(12px + env(safe-area-inset-left, 0px)); z-index: 4;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); padding: 4px 4px 4px 10px;
+}
+.pick-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+.pickbar .seg { border: 0; padding: 0; background: none; }
+.pickbar .seg button { padding: 4px 9px; }
+.hint { top: 62px; }
+
+.cbtn { width: 44px; height: 30px; border: 1px solid var(--line); border-radius: 6px; padding: 3px; background: var(--surface); }
+.cbtn span { display: block; width: 100%; height: 100%; border-radius: 3px; box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.12); }
+.palette-edit .cbtn { width: 40px; height: 32px; }
+
+.colorpop {
+  position: fixed; z-index: 60; width: 272px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: var(--shadow); padding: 12px; display: flex; flex-direction: column; gap: 10px;
+}
+.cgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.cgrid button { aspect-ratio: 1; max-width: 100%; border-radius: 8px; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); padding: 0; }
+.cgrid button.on { box-shadow: 0 0 0 2px var(--accent); }
+.cgrid .sep { grid-column: 1 / -1; height: 1px; background: var(--line); margin: 2px 0; }
+.ccustom { display: flex; align-items: center; justify-content: space-between; font-size: 12.5px; color: var(--muted); font-weight: 500; }
+.ccustom input { width: 44px; height: 28px; }
+
+@media (max-width: 760px) {
+  .pickbar { top: 10px; left: 10px; padding: 3px 3px 3px 8px; gap: 6px; }
+  .pickbar .seg button { padding: 4px 7px; font-size: 12px; }
+  .hint { top: 56px; max-width: calc(100% - 80px); }
+  .colorpop { left: 12px !important; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); top: auto !important; width: auto; }
+}

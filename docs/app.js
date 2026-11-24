@@ -13,22 +13,100 @@
     AN: { ko: "남극", en: "Antarctica", ext: null },
   };
   const CONT_ORDER = ["AS", "EU", "AF", "NA", "SA", "OC", "AN"];
+
+  // ---------- 언어 ----------
+  const T = {
+    ko: {
+      appName: "지도추출기", brandSub: "대륙 › 국가 › 도·주 › 시", crumbsAria: "현재 위치", tabList: "목록", tabStyle: "스타일",
+      searchPh: "국가·지역 검색 (한/영)", clearAll: "모두 해제", paintAll: "이 단계 모두 칠하기", language: "언어",
+      shape: "끝단 모양", round: "둥글", angle: "각", detail: "디테일", precise: "정밀", normal: "보통", simple: "단순",
+      paintColors: "칠하기 색", mapColors: "지도 색", preset: "프리셋", dark: "다크", light: "라이트", mono: "모노",
+      baseFill: "기본 지역", stroke: "경계선", bg: "배경", strokeW: "선 두께", display: "표시", names: "이름",
+      auto: "자동", painted: "칠한 곳", none: "없음", optContext: "주변 국가 표시", optOverseas: "해외 영토·원거리 섬 포함",
+      optAntarctica: "세계지도에 남극 표시", optBg: "다운로드에 배경색 포함",
+      foot: "지도 데이터: Natural Earth (Public Domain) · geoBoundaries (CC BY 4.0) · 한국 시군구: 통계청 SGIS(공공누리 제1유형), vuski/admdongkor (CC BY 4.0)",
+      tools: "도구", erase: "지우개", pin: "핀 꽂기", dlSel: "칠한 곳만", dlSelTitle: "칠한 지역만 SVG로", dlAll: "SVG 다운로드", more: "다른 형식",
+      map: "지도", pickAria: "선택 단위", pickLabel: "선택", pickAuto: "자동", pickC: "국가", pickA1: "도·주", pickA2: "시",
+      zoomGrp: "확대 축소", up: "상위 단계로", zin: "확대", zout: "축소", fit: "전체 보기", loading: "지도 불러오는 중…",
+      export: "내보내기", close: "닫기", svgSel: "SVG · 칠한 곳만", png: "PNG 이미지 (고해상도)", pngSel: "PNG · 칠한 곳만", copy: "SVG 코드 복사",
+      exportNote: "지금 화면에 보이는 범위를 저장합니다. 다른 단계에서 고른 곳도 함께 들어갑니다.",
+      pptNote: "PPT: 삽입 › 그림 › SVG 파일 선택 → 우클릭 <b>도형으로 변환</b> → <b>그룹 해제</b>하면 지역별로 쪼개집니다. (Microsoft 365 / PowerPoint 2019 이상)",
+      size: "크기", border: "테두리", dup: "복제", del: "삭제", pickColor: "색 선택", custom: "직접 선택",
+      world: "전세계", lvWorld: "대륙", lvContinent: "국가", lvCountry: "도·주", lvRegion: "시·군·구", count: "{n}개",
+      jumpOther: "다른 국가로 이동", noMatch: "‘{q}’와 일치하는 지역이 없습니다.", enter: "{n} 들어가기", enterT: "들어가기",
+      showRegion: "이 지역 보기", unpick: "{n} 선택 해제", picked: "선택한 곳 · {n}", colorN: "{n}번 색", colorPick: "{n}번 색으로 선택",
+      hintErase: "지우개: 마지막 단계에서 누른 곳의 선택을 지웁니다", hintPin: "지도를 누르면 핀이 꽂힙니다", hintColor: "{n}번 색으로 선택합니다",
+      hintPick: { auto: "자동: 누르면 한 단계씩 들어가고, 마지막 단계에서 선택", c: "국가 단위: 누르면 그 나라를 선택", a1: "도·주 단위: 국가까지 들어간 뒤 도·주를 선택", a2: "시 단위: 도·주까지 들어간 뒤 시를 선택" },
+      noAdm1: "{n}: 도·주 구분 데이터가 없습니다.", loadFail: "지도 데이터를 불러오지 못했습니다. 연결을 확인해 주세요.",
+      noSel: "먼저 지역을 선택해 주세요.", noExport: "내보낼 지역이 없습니다.", svgSaved: "SVG 저장됨 · PPT에서 도형으로 변환 후 그룹 해제",
+      pngSaved: "PNG 저장됨", pngFail: "PNG 변환에 실패했습니다. SVG로 받아 주세요.", copied: "SVG 코드를 복사했습니다.",
+      copyBlocked: "복사가 막혀 있습니다. SVG 다운로드를 사용해 주세요.", pinCopied: "핀 복사됨", loadFail2: "지도 데이터를 불러오지 못했습니다. 새로고침해 주세요.",
+      introPhone: "누르면 확대되며 한 단계씩 들어가요 · 마지막 단계에서 누르면 선택 · 길게 누르면 그 단계에서 선택",
+      introPC: "클릭하면 확대되며 한 단계씩 들어가요 · 마지막 단계에서 클릭하면 선택 · Shift+클릭은 그 단계에서 선택",
+      sheetOpen: "목록 열기", sheetClose: "목록 닫기", pinColor: "핀 색 {n}",
+      gNear: "주변", gRegions: "지역", gPicked: "선택", gDots: "위치점", gNames: "이름", gPins: "핀", gBase: "바탕",
+    },
+    en: {
+      appName: "Map Extractor", brandSub: "Continent › Country › State › City", crumbsAria: "Current location", tabList: "List", tabStyle: "Style",
+      searchPh: "Search countries & regions", clearAll: "Clear all", paintAll: "Paint all at this level", language: "Language",
+      shape: "Corners", round: "Round", angle: "Sharp", detail: "Detail", precise: "Fine", normal: "Normal", simple: "Simple",
+      paintColors: "Paint colors", mapColors: "Map colors", preset: "Preset", dark: "Dark", light: "Light", mono: "Mono",
+      baseFill: "Land", stroke: "Borders", bg: "Background", strokeW: "Line width", display: "Display", names: "Names",
+      auto: "Auto", painted: "Painted", none: "None", optContext: "Show neighboring areas", optOverseas: "Include overseas territories",
+      optAntarctica: "Show Antarctica on world map", optBg: "Include background in downloads",
+      foot: "Map data: Natural Earth (public domain) · geoBoundaries (CC BY 4.0) · Korea: Statistics Korea SGIS (KOGL Type 1), vuski/admdongkor (CC BY 4.0)",
+      tools: "Tools", erase: "Eraser", pin: "Add pin", dlSel: "Painted only", dlSelTitle: "Download painted areas as SVG", dlAll: "Download SVG", more: "More formats",
+      map: "Map", pickAria: "Selection level", pickLabel: "Select", pickAuto: "Auto", pickC: "Country", pickA1: "State", pickA2: "City",
+      zoomGrp: "Zoom", up: "Up one level", zin: "Zoom in", zout: "Zoom out", fit: "Fit to view", loading: "Loading map…",
+      export: "Export", close: "Close", svgSel: "SVG · painted only", png: "PNG image (high resolution)", pngSel: "PNG · painted only", copy: "Copy SVG code",
+      exportNote: "Saves what is visible on screen, including areas picked at other levels.",
+      pptNote: "PowerPoint: Insert › Pictures › choose the SVG → right-click <b>Convert to Shape</b> → <b>Ungroup</b> to split it into regions. (Microsoft 365 / PowerPoint 2019+)",
+      size: "Size", border: "Outline", dup: "Duplicate", del: "Delete", pickColor: "Choose a color", custom: "Custom",
+      world: "World", lvWorld: "Continents", lvContinent: "Countries", lvCountry: "States", lvRegion: "Cities", count: "{n}",
+      jumpOther: "Go to another country", noMatch: "No area matches “{q}”.", enter: "Open {n}", enterT: "Open",
+      showRegion: "Show this area", unpick: "Remove {n}", picked: "Selected · {n}", colorN: "Color {n}", colorPick: "Select with color {n}",
+      hintErase: "Eraser: tap an area at the last level to clear it", hintPin: "Tap the map to drop a pin", hintColor: "Selecting with color {n}",
+      hintPick: { auto: "Auto: tap to zoom in one level; tap at the last level to select", c: "Country: tap to select a country", a1: "State: open a country, then tap states", a2: "City: open a state, then tap cities" },
+      noAdm1: "{n}: no state-level data.", loadFail: "Couldn't load map data. Check your connection.",
+      noSel: "Select an area first.", noExport: "Nothing to export.", svgSaved: "SVG saved · in PowerPoint, Convert to Shape, then Ungroup",
+      pngSaved: "PNG saved", pngFail: "PNG export failed. Download the SVG instead.", copied: "SVG code copied.",
+      copyBlocked: "Copying is blocked here. Use Download SVG.", pinCopied: "Pin copied", loadFail2: "Couldn't load map data. Please reload.",
+      introPhone: "Tap to zoom in one level at a time · tap at the last level to select · long-press to select at the current level",
+      introPC: "Click to zoom in one level at a time · click at the last level to select · Shift+click selects at the current level",
+      sheetOpen: "Open list", sheetClose: "Close list", pinColor: "Pin color {n}",
+      gNear: "Neighbors", gRegions: "Regions", gPicked: "Selected", gDots: "Markers", gNames: "Names", gPins: "Pins", gBase: "Base",
+    },
+  };
+  const t = (k, vars) => { let v = (T[S.lang] || T.ko)[k] ?? T.ko[k] ?? k; if (vars && typeof v === "string") for (const x in vars) v = v.replace("{" + x + "}", vars[x]); return v; };
+  const nm = (p) => (S.lang === "en" ? p.en || p.ko : p.ko || p.en);
+  const alt = (p) => (S.lang === "en" ? p.ko : p.en);
+
+  // 파스텔 30색(15개 색상 × 연한/중간) + 무채색 6
+  function hsl2hex(h, s, l) {
+    s /= 100; l /= 100;
+    const f = (n) => { const k = (n + h / 30) % 12, a = s * Math.min(l, 1 - l); return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))).toString(16).padStart(2, "0"); };
+    return "#" + f(0) + f(8) + f(4);
+  }
+  const HUES = [0, 16, 30, 42, 52, 70, 100, 140, 165, 182, 198, 212, 232, 262, 300];
+  const PASTELS = HUES.map((h) => hsl2hex(h, 75, 86)).concat(HUES.map((h) => hsl2hex(h, 55, 70)));
+  const NEUTRALS = ["#ffffff", "#f2f4f6", "#d5dbe1", "#8a96a3", "#3a4654", "#10161d"];
   const WORLD_EXT = [-169, -57, 190, 80];
   const PRESETS = {
     dark: { bg: "#10161d", fill: "#f2f4f6", stroke: "#10161d", strokeW: 0.8 },
     light: { bg: "#ffffff", fill: "#d5dbe1", stroke: "#ffffff", strokeW: 1 },
     mono: { bg: "#ffffff", fill: "#ffffff", stroke: "#1f2937", strokeW: 0.8 },
   };
-  const DEFAULT_PALETTE = ["#2bb5ad", "#3b82f6", "#f5a524", "#e5484d", "#8b5cf6"];
+  const DEFAULT_PALETTE = [hsl2hex(182, 55, 62), hsl2hex(212, 60, 66), hsl2hex(30, 80, 66), hsl2hex(0, 65, 70), hsl2hex(262, 50, 72)];
   const PIN_COLORS = ["#e5484d", "#f5a524", "#f7d038", "#2bb5ad", "#3b82f6", "#8b5cf6", "#8a96a3", "#ffffff", "#111827"];
   const PIN_PATH = "M0,0C-2.2,-5.6 -9,-10.4 -9,-17.5A9,9 0 1 1 9,-17.5C9,-10.4 2.2,-5.6 0,0Z";
   const STORE_KEY = "mapx-world-v3";
-  const SAVE_KEYS = ["shape", "detail", "labels", "labelsV2", "context", "overseas", "antarctica", "exportBg", "bg", "fill", "stroke", "strokeW", "preset", "palette", "tool", "seenIntro"];
-  const LEVEL_NAME = { world: "대륙", continent: "국가", country: "도·주", region: "시·군·구" };
+  const SAVE_KEYS = ["lang", "pick", "shape", "detail", "labels", "labelsV2", "context", "overseas", "antarctica", "exportBg", "bg", "fill", "stroke", "strokeW", "preset", "palette", "tool", "seenIntro"];
+  const LEVEL_NAME = { world: "lvWorld", continent: "lvContinent", country: "lvCountry", region: "lvRegion" };
   const DEPTH = { c: 1, a1: 2, a2: 3 };
 
   // ---------- 상태 ----------
   const defaults = {
+    lang: (navigator.language || "ko").toLowerCase().startsWith("ko") ? "ko" : "en", pick: "auto",
     shape: "angle", detail: 60, labels: "auto", labelsV2: true, context: true, overseas: false, antarctica: false, exportBg: false,
     ...PRESETS.dark, preset: "dark", palette: DEFAULT_PALETTE.slice(), tool: 0, seenIntro: false,
   };
@@ -71,12 +149,14 @@
   const data = { world: null, adm1: new Map(), adm2: new Map(), adm1Index: new Set(), adm2Index: new Set(), countries: [], byId: new Map() };
 
   // 원본 데이터의 어색한 한국어 국가명 보정
+  const EN_FIX = { USA: "United States", TUR: "Türkiye", CZE: "Czechia" };
   const NAME_FIX = { CHN: "중국", PRK: "북한", TUR: "튀르키예", TWN: "대만", AUS: "호주", NCL: "뉴칼레도니아", VAT: "바티칸" };
   function prepTopo(topo) {
     const name = Object.keys(topo.objects)[0];
     for (const g of topo.objects[name].geometries) {
       const p = g.properties || (g.properties = {});
       if (name === "countries" && NAME_FIX[p.id]) p.ko = NAME_FIX[p.id];
+      if (name === "countries" && EN_FIX[p.id]) p.en = EN_FIX[p.id];
       p.ko = p.ko || p.en || p.id || "?";
       p.en = p.en || p.ko;
     }
@@ -256,27 +336,29 @@
 
   // ---------- 뷰 ----------
   const hashKey = () => (view.level === "world" ? "" : view.level === "continent" ? "c-" + view.ct : view.level === "country" ? "k-" + view.cc : "r-" + view.a1);
-  const countryName = (cc) => (data.byId.get(cc) ? data.byId.get(cc).properties.ko : cc);
+  const countryName = (cc) => (data.byId.get(cc) ? nm(data.byId.get(cc).properties) : cc);
+  const a1Name = (cc, a1) => { const f = data.adm1.get(cc)?.byId.get(a1); return f ? nm(f.properties) : ""; };
+  const contName = (c) => nm(CONT[c]);
+  const sortNm = (a, b) => a.ko.localeCompare(b.ko, S.lang);
 
   function units() {
     if (view.level === "world") {
-      return CONT_ORDER.filter((c) => c !== "AN" || S.antarctica).map((c) => ({ id: c, ko: CONT[c].ko, en: CONT[c].en, drill: true, noSel: true }));
+      return CONT_ORDER.filter((c) => c !== "AN" || S.antarctica).map((c) => ({ id: c, ko: contName(c), en: alt(CONT[c]), drill: true, noSel: true }));
     }
     if (view.level === "continent") {
       return data.countries.filter((f) => f.properties.ct === view.ct)
-        .map((f) => ({ id: f.properties.id, ko: f.properties.ko, en: f.properties.en, drill: data.adm1Index.has(f.properties.id), lv: "c", cc: f.properties.id }))
-        .sort((a, b) => a.ko.localeCompare(b.ko, "ko"));
+        .map((f) => ({ id: f.properties.id, ko: nm(f.properties), en: alt(f.properties), drill: data.adm1Index.has(f.properties.id), lv: "c", cc: f.properties.id }))
+        .sort(sortNm);
     }
     if (view.level === "country") {
-      return data.adm1.get(view.cc).full.map((f) => ({ id: f.properties.id, ko: f.properties.ko, en: f.properties.en, sub: f.properties.t, drill: hasCities(f.properties.id), lv: "a1", cc: view.cc }))
-        .sort((a, b) => a.ko.localeCompare(b.ko, "ko"));
+      return data.adm1.get(view.cc).full.map((f) => ({ id: f.properties.id, ko: nm(f.properties), en: alt(f.properties), sub: f.properties.t, drill: hasCities(f.properties.id), lv: "a1", cc: view.cc }))
+        .sort(sortNm);
     }
-    return data.adm2.get(view.a1).full.map((f) => ({ id: f.properties.id, ko: f.properties.ko, en: f.properties.en, drill: false, lv: "a2", cc: view.cc, a1: view.a1 }))
-      .sort((a, b) => a.ko.localeCompare(b.ko, "ko"));
+    return data.adm2.get(view.a1).full.map((f) => ({ id: f.properties.id, ko: nm(f.properties), en: alt(f.properties), drill: false, lv: "a2", cc: view.cc, a1: view.a1 }))
+      .sort(sortNm);
   }
   function selInfo(u) {
-    const a1n = u.a1 && data.adm1.get(u.cc) ? data.adm1.get(u.cc).byId.get(u.a1)?.properties.ko : null;
-    return { lv: u.lv, id: u.id, cc: u.cc, a1: u.a1 || null, ct: data.byId.get(u.cc)?.properties.ct, name: u.ko, parent: [a1n, u.lv !== "c" ? countryName(u.cc) : null].filter(Boolean).join(" · ") };
+    return { lv: u.lv, id: u.id, cc: u.cc, a1: u.a1 || null, ct: data.byId.get(u.cc)?.properties.ct, name: u.ko };
   }
 
   // ---------- 렌더 ----------
@@ -293,7 +375,7 @@
     if (view.level === "world") {
       const feats = featuresAt(data.world, det).filter((f) => S.antarctica || f.properties.ct !== "AN");
       projection = d3.geoMercator().rotate([-10, 0]).precision(0.3).fitExtent(ext, extentObj(WORLD_EXT));
-      unitFeats = feats.map((f) => ({ f, lv: "c", id: f.properties.id, cc: f.properties.id, name: f.properties.ko, group: f.properties.ct }));
+      unitFeats = feats.map((f) => ({ f, lv: "c", id: f.properties.id, cc: f.properties.id, name: nm(f.properties), group: f.properties.ct }));
     } else if (view.level === "continent") {
       const worldF = featuresAt(data.world, det);
       if (view.ct === "AN") {
@@ -303,20 +385,20 @@
         projection = d3.geoMercator().rotate([-centerLon(fit), 0]).precision(0.3).fitExtent(ext, fit);
       }
       for (const f of worldF) {
-        if (f.properties.ct === view.ct) unitFeats.push({ f, lv: "c", id: f.properties.id, cc: f.properties.id, name: f.properties.ko });
+        if (f.properties.ct === view.ct) unitFeats.push({ f, lv: "c", id: f.properties.id, cc: f.properties.id, name: nm(f.properties) });
         else ctxFeats.push({ f, lv: "c", id: f.properties.id, cc: f.properties.id });
       }
     } else if (view.level === "country") {
       const cf = data.byId.get(view.cc);
       const fit = S.overseas ? cf.geometry : mainland(cf.geometry);
       projection = d3.geoMercator().rotate([-centerLon(fit), 0]).precision(0.3).fitExtent(ext, fit);
-      unitFeats = featuresAt(data.adm1.get(view.cc), det).map((f) => ({ f, lv: "a1", id: f.properties.id, cc: view.cc, name: f.properties.ko }));
+      unitFeats = featuresAt(data.adm1.get(view.cc), det).map((f) => ({ f, lv: "a1", id: f.properties.id, cc: view.cc, name: nm(f.properties) }));
       ctxFeats = featuresAt(data.world, ctxDetail).filter((f) => f.properties.id !== view.cc).map((f) => ({ f, lv: "c", id: f.properties.id, cc: f.properties.id }));
     } else {
       const a1f = data.adm1.get(view.cc).byId.get(view.a1);
       const fit = S.overseas ? a1f.geometry : mainland(a1f.geometry);
       projection = d3.geoMercator().rotate([-centerLon(fit), 0]).precision(0.3).fitExtent(ext, fit);
-      unitFeats = featuresAt(data.adm2.get(view.a1), det).map((f) => ({ f, lv: "a2", id: f.properties.id, cc: view.cc, a1: view.a1, name: f.properties.ko }));
+      unitFeats = featuresAt(data.adm2.get(view.a1), det).map((f) => ({ f, lv: "a2", id: f.properties.id, cc: view.cc, a1: view.a1, name: nm(f.properties) }));
       const nb = new Set(view.nb);
       ctxFeats = view.nb.flatMap((a) => featuresAt(data.adm2.get(a), ctxDetail).map((f) => ({ f, lv: "a2", id: f.properties.id, cc: view.cc, a1: a })))
         .concat(featuresAt(data.adm1.get(view.cc), ctxDetail).filter((f) => f.properties.id !== view.a1 && !nb.has(f.properties.id)).map((f) => ({ f, lv: "a1", id: f.properties.id, cc: view.cc })))
@@ -349,7 +431,7 @@
       const d = pathD(c.f.geometry, round);
       if (!d) continue;
       shown.add(skey(c.lv, c.id));
-      m.ctx.push({ ...c, d, name: c.f.properties.ko, color });
+      m.ctx.push({ ...c, d, name: nm(c.f.properties), color });
     }
     // 다른 단계에서 고른 곳(더 깊은 단계)을 위에 덮어 그림
     const ovl = [...sel.values()].filter((s) => !shown.has(skey(s.lv, s.id))).sort((a, b) => DEPTH[a.lv] - DEPTH[b.lv]);
@@ -357,7 +439,7 @@
       const g = selGeom(s, det);
       if (!g) continue;
       const d = pathD(g.geometry, round);
-      if (d) m.ovl.push({ ...s, d, geom: g.geometry, color: S.palette[s.ci] });
+      if (d) m.ovl.push({ ...s, name: nm(g.properties), d, geom: g.geometry, color: S.palette[s.ci] });
     }
     model = m;
     computeMarkers();
@@ -540,7 +622,7 @@
   async function navigate(v, { push = true } = {}) {
     try {
       if (v.level === "country" || v.level === "region") {
-        if (!data.adm1Index.has(v.cc)) { toast(`${countryName(v.cc)}: 도·주 구분 데이터가 없습니다.`); return; }
+        if (!data.adm1Index.has(v.cc)) { toast(t("noAdm1", { n: countryName(v.cc) })); return; }
         await ensureAdm1(v.cc);
       }
       if (v.level === "region") {
@@ -554,7 +636,7 @@
         }).map((f) => f.properties.id).slice(0, 12);
         await Promise.all(v.nb.map((a) => ensureAdm2(v.cc, a).catch(() => null)));
       }
-    } catch { toast("지도 데이터를 불러오지 못했습니다. 연결을 확인해 주세요."); return; }
+    } catch { toast(t("loadFail")); return; }
     view.level = v.level;
     view.cc = v.level === "country" || v.level === "region" ? v.cc : null;
     view.a1 = v.level === "region" ? v.a1 : null;
@@ -578,7 +660,18 @@
     if (f) navigate({ level: "continent", ct: f.properties.ct });
   }
   // 단위를 눌렀을 때: 들어갈 수 있으면 확대하며 들어가고, 마지막 단계면 선택
+  const PICK_DEPTH = { c: 1, a1: 2, a2: 3 };
   function onUnit(u, forceSelect, els) {
+    const pick = S.pick;
+    if (pick !== "auto" && !forceSelect) {
+      const ud = DEPTH[u.lv], pd = PICK_DEPTH[pick];
+      // 고정한 단위보다 깊은 곳을 누르면 그 상위(국가·도·주)를 선택
+      if (ud > pd) {
+        if (pick === "c") return toggleSel(selInfo({ lv: "c", id: u.cc, cc: u.cc, ko: countryName(u.cc) }));
+        if (pick === "a1") return toggleSel(selInfo({ lv: "a1", id: u.a1, cc: u.cc, ko: a1Name(u.cc, u.a1) }));
+      }
+      if (ud === pd) return toggleSel(selInfo({ ...u, ko: u.name }));
+    }
     if (view.level === "world") {
       const ct = u.group;
       return zoomInto(svg.querySelectorAll(`#units .unit[data-g="${ct}"]`), () => navigate({ level: "continent", ct }));
@@ -600,10 +693,10 @@
   const chevron = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
 
   function renderCrumbs() {
-    const parts = [{ label: "전세계", v: { level: "world" } }];
-    if (view.ct) parts.push({ label: CONT[view.ct].ko, v: { level: "continent", ct: view.ct } });
+    const parts = [{ label: t("world"), v: { level: "world" } }];
+    if (view.ct) parts.push({ label: contName(view.ct), v: { level: "continent", ct: view.ct } });
     if (view.cc) parts.push({ label: countryName(view.cc), v: { level: "country", cc: view.cc } });
-    if (view.a1) parts.push({ label: data.adm1.get(view.cc).byId.get(view.a1).properties.ko, v: null });
+    if (view.a1) parts.push({ label: a1Name(view.cc, view.a1), v: null });
     const el = $("crumbs");
     el.innerHTML = "";
     parts.forEach((p, i) => {
@@ -615,7 +708,7 @@
       el.appendChild(b);
     });
     const n = units().length;
-    $("listTitle").textContent = view.level === "world" ? "대륙" : `${LEVEL_NAME[view.level]} · ${n}개`;
+    $("listTitle").textContent = view.level === "world" ? t("lvWorld") : `${t(LEVEL_NAME[view.level])} · ${t("count", { n })}`;
     $("selAll").hidden = view.level === "world";
     $("zoomUp").disabled = view.level === "world";
   }
@@ -628,16 +721,16 @@
       const here = new Set(us.map((u) => u.id));
       const extra = data.countries.filter((f) => !here.has(f.properties.id) && (f.properties.ko.toLowerCase().includes(q) || f.properties.en.toLowerCase().includes(q))).slice(0, 30);
       if (extra.length) {
-        h += `<li class="group">다른 국가로 이동</li>` + extra.map((f) =>
-          `<li class="item nobox" data-jump="${f.properties.id}"><span class="nm">${esc(f.properties.ko)}<small>${esc(CONT[f.properties.ct].ko)}</small></span><button class="go" data-jump="${f.properties.id}" aria-label="${esc(f.properties.ko)}로 이동">${chevron}</button></li>`).join("");
+        h += `<li class="group">${t("jumpOther")}</li>` + extra.map((f) =>
+          `<li class="item nobox" data-jump="${f.properties.id}"><span class="nm">${esc(nm(f.properties))}<small>${esc(contName(f.properties.ct))}</small></span><button class="go" data-jump="${f.properties.id}" aria-label="${esc(t("enter", { n: nm(f.properties) }))}">${chevron}</button></li>`).join("");
       }
     }
-    if (!h) h = `<li class="empty">‘${esc(q)}’와 일치하는 지역이 없습니다.</li>`;
+    if (!h) h = `<li class="empty">${esc(t("noMatch", { q }))}</li>`;
     listEl.innerHTML = h;
   }
   function itemHTML(u) {
     const sub = u.sub || (u.en && u.en !== u.ko ? u.en : "");
-    const go = `<button class="go" data-drill="${esc(u.id)}" ${u.drill ? "" : "disabled"} aria-label="${esc(u.ko)} 들어가기" title="들어가기">${chevron}</button>`;
+    const go = `<button class="go" data-drill="${esc(u.id)}" ${u.drill ? "" : "disabled"} aria-label="${esc(t("enter", { n: u.ko }))}" title="${t("enterT")}">${chevron}</button>`;
     if (u.noSel) return `<li class="item nobox" data-drill="${esc(u.id)}"><span class="nm">${esc(u.ko)}<small>${esc(sub)}</small></span>${go}</li>`;
     const own = selColor(u.lv, u.id), inh = !own && fillFor(u.lv, u.id, u.cc, u.a1);
     const c = own || inh;
@@ -647,9 +740,13 @@
   function renderChips() {
     const items = [...sel.values()];
     $("picked").hidden = !items.length;
-    $("pickedTitle").textContent = `선택한 곳 · ${items.length}`;
-    $("chips").innerHTML = items.map((s) =>
-      `<span class="chip"><span class="dot" style="background:${S.palette[s.ci]}"></span><button class="go2" data-k="${esc(skey(s.lv, s.id))}" title="이 지역 보기">${esc(s.name)}${s.parent ? `<small>${esc(s.parent)}</small>` : ""}</button><button class="rm" data-rm="${esc(skey(s.lv, s.id))}" aria-label="${esc(s.name)} 선택 해제">×</button></span>`).join("");
+    $("pickedTitle").textContent = t("picked", { n: items.length });
+    $("chips").innerHTML = items.map((s) => {
+      const g = selGeom(s, S.detail), name = g ? nm(g.properties) : s.name;
+      const parent = [s.lv === "a2" ? a1Name(s.cc, s.a1) : "", s.lv !== "c" ? countryName(s.cc) : ""].filter(Boolean).join(" · ");
+      const k = esc(skey(s.lv, s.id));
+      return `<span class="chip"><span class="dot" style="background:${S.palette[s.ci]}"></span><button class="go2" data-k="${k}" title="${t("showRegion")}">${esc(name)}${parent ? `<small>${esc(parent)}</small>` : ""}</button><button class="rm" data-rm="${k}" aria-label="${esc(t("unpick", { n: name }))}">×</button></span>`;
+    }).join("");
   }
   // 칩을 누르면 그 지역이 보이는 단계로 이동
   function showSel(s) {
@@ -661,20 +758,20 @@
   // ---------- 도구 ----------
   function renderTools() {
     $("paletteTools").innerHTML = S.palette.map((c, i) =>
-      `<button class="tool" data-tool="${i}" title="${i + 1}번 색 (${i + 1})" aria-label="${i + 1}번 색으로 선택"><span class="dot" style="background:${c}"></span></button>`).join("");
+      `<button class="tool" data-tool="${i}" title="${t("colorN", { n: i + 1 })} (${i + 1})" aria-label="${t("colorPick", { n: i + 1 })}"><span class="dot" style="background:${c}"></span></button>`).join("");
     document.querySelectorAll("#tools .tool").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.tool === String(S.tool))));
     svg.classList.toggle("pinning", S.tool === "pin");
-    $("paletteEdit").innerHTML = S.palette.map((c, i) => `<input type="color" data-pi="${i}" value="${c}" aria-label="${i + 1}번 색">`).join("");
+    $("paletteEdit").innerHTML = S.palette.map((c, i) => `<button class="cbtn" data-cv="pal${i}" aria-label="${t("colorN", { n: i + 1 })}"><span style="background:${c}"></span></button>`).join("");
   }
   let toolBeforePin = 0;
-  function setTool(t) {
-    if (t === "pin" && S.tool !== "pin") toolBeforePin = S.tool;
-    S.tool = t;
-    if (typeof t === "number") lastColor = t;
-    if (t !== "pin") save();
+  function setTool(tool) {
+    if (tool === "pin" && S.tool !== "pin") toolBeforePin = S.tool;
+    S.tool = tool;
+    if (typeof tool === "number") lastColor = tool;
+    if (tool !== "pin") save();
     renderTools();
-    const msg = { erase: "지우개: 마지막 단계에서 누른 곳의 선택을 지웁니다", pin: "지도를 누르면 핀이 꽂힙니다" }[t];
-    hint(msg || `${t + 1}번 색으로 선택합니다`);
+    const msg = { erase: T[S.lang].hintErase, pin: T[S.lang].hintPin }[tool];
+    hint(msg || t("hintColor", { n: tool + 1 }));
   }
 
   // ---------- 핀 ----------
@@ -725,23 +822,23 @@
     let o = `<svg xmlns="http://www.w3.org/2000/svg" width="${vb[2]}" height="${vb[3]}" viewBox="${vb.join(" ")}">\n`;
     if (S.exportBg) o += `<rect x="${vb[0]}" y="${vb[1]}" width="${vb[2]}" height="${vb[3]}" fill="${S.bg}"/>\n`;
     const ctxOut = onlySel ? ctx : (S.context ? m.ctx : m.ctx.filter((c) => c.color));
-    if (ctxOut.length) o += `<g id="주변">` + ctxOut.map((c) => `<path id="${idOf(c.name)}" d="${c.d}" ${ctxAttrs(c)}/>`).join("") + `</g>\n`;
+    if (ctxOut.length) o += `<g id="${t("gNear")}">` + ctxOut.map((c) => `<path id="${idOf(c.name)}" d="${c.d}" ${ctxAttrs(c)}/>`).join("") + `</g>\n`;
     if (view.level === "world") {
       for (const c of CONT_ORDER) {
         const us = units.filter((u) => u.group === c);
-        if (us.length) o += `<g id="${CONT[c].ko}">` + us.map((u) => `<path id="${idOf(u.name)}" d="${u.d}" ${unitAttrs(u)}/>`).join("") + `</g>\n`;
+        if (us.length) o += `<g id="${contName(c)}">` + us.map((u) => `<path id="${idOf(u.name)}" d="${u.d}" ${unitAttrs(u)}/>`).join("") + `</g>\n`;
       }
     } else if (units.length) {
-      if (m.under && !onlySel && m.under.color) o += `<path id="바탕" d="${m.under.d}" fill="${m.under.color}"/>\n`;
-      o += `<g id="지역">` + units.map((u) => `<path id="${idOf(u.name)}" d="${u.d}" ${unitAttrs(u)}/>`).join("") + `</g>\n`;
+      if (m.under && !onlySel && m.under.color) o += `<path id="${t("gBase")}" d="${m.under.d}" fill="${m.under.color}"/>\n`;
+      o += `<g id="${t("gRegions")}">` + units.map((u) => `<path id="${idOf(u.name)}" d="${u.d}" ${unitAttrs(u)}/>`).join("") + `</g>\n`;
     }
-    if (ovl.length) o += `<g id="선택">` + ovl.map((x) => `<path id="${idOf(x.name)}" d="${x.d}" ${ovlAttrs(x)}/>`).join("") + `</g>\n`;
+    if (ovl.length) o += `<g id="${t("gPicked")}">` + ovl.map((x) => `<path id="${idOf(x.name)}" d="${x.d}" ${ovlAttrs(x)}/>`).join("") + `</g>\n`;
     const mks = m.markers.filter((mk) => tiny(mk, 1) && inView(mk.x, mk.y));
-    if (mks.length) o += `<g id="위치점">` + mks.map((mk) => markerSVG(mk, mk.x, mk.y)).join("") + `</g>\n`;
+    if (mks.length) o += `<g id="${t("gDots")}">` + mks.map((mk) => markerSVG(mk, mk.x, mk.y)).join("") + `</g>\n`;
     const labels = m.labels.filter((l) => inView(l.x, l.y));
-    if (labels.length) o += `<g id="이름">` + labels.map((l) => labelSVG(l, l.x, l.y - (dotted(l.key, 1) ? l.fs : 0))).join("") + `</g>\n`;
+    if (labels.length) o += `<g id="${t("gNames")}">` + labels.map((l) => labelSVG(l, l.x, l.y - (dotted(l.key, 1) ? l.fs : 0))).join("") + `</g>\n`;
     const ps = pins.map((p) => [p, projection([p.lon, p.lat])]).filter(([, xy]) => xy && inView(xy[0], xy[1]));
-    if (ps.length) o += `<g id="핀">` + ps.map(([p, xy]) => pinSVG(p, xy)).join("") + `</g>\n`;
+    if (ps.length) o += `<g id="${t("gPins")}">` + ps.map(([p, xy]) => pinSVG(p, xy)).join("") + `</g>\n`;
     return { svg: o + `</svg>\n`, w: vb[2], h: vb[3] };
   }
   const usedIds = new Map();
@@ -769,31 +866,31 @@
   function exportSVG(onlySel) {
     closePanels(); usedIds.clear();
     const r = buildSVG(onlySel);
-    if (!r) { toast(onlySel ? "먼저 지역을 선택해 주세요." : "내보낼 지역이 없습니다."); return; }
+    if (!r) { toast(onlySel ? t("noSel") : t("noExport")); return; }
     download(new Blob([r.svg], { type: "image/svg+xml" }), fileBase(onlySel) + ".svg");
-    toast("SVG 저장됨 · PPT에서 도형으로 변환 후 그룹 해제");
+    toast(t("svgSaved"));
   }
   function exportPNG(onlySel) {
     closePanels(); usedIds.clear();
     const r = buildSVG(onlySel);
-    if (!r) { toast(onlySel ? "먼저 지역을 선택해 주세요." : "내보낼 지역이 없습니다."); return; }
+    if (!r) { toast(onlySel ? t("noSel") : t("noExport")); return; }
     const scale = Math.min(4, 6000 / Math.max(r.w, r.h));
     const img = new Image();
     img.onload = () => {
       const c = document.createElement("canvas");
       c.width = Math.round(r.w * scale); c.height = Math.round(r.h * scale);
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      c.toBlob((b) => { download(b, fileBase(onlySel) + ".png"); toast("PNG 저장됨"); }, "image/png");
+      c.toBlob((b) => { download(b, fileBase(onlySel) + ".png"); toast(t("pngSaved")); }, "image/png");
     };
-    img.onerror = () => toast("PNG 변환에 실패했습니다. SVG로 받아 주세요.");
+    img.onerror = () => toast(t("pngFail"));
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(r.svg);
   }
   async function copySVG() {
     closePanels(); usedIds.clear();
     const r = buildSVG(false);
     if (!r) return;
-    try { await navigator.clipboard.writeText(r.svg); toast("SVG 코드를 복사했습니다."); }
-    catch { toast("복사가 막혀 있습니다. SVG 다운로드를 사용해 주세요."); }
+    try { await navigator.clipboard.writeText(r.svg); toast(t("copied")); }
+    catch { toast(t("copyBlocked")); }
   }
 
   // ---------- UI 공통 ----------
@@ -811,12 +908,53 @@
   function showLoading(on) { $("loading").hidden = !on; }
   function closePanels() { $("morePanel").hidden = true; $("moreBtn").setAttribute("aria-expanded", "false"); }
 
+  function applyI18n() {
+    document.documentElement.lang = S.lang;
+    document.title = S.lang === "en" ? "Map Extractor World" : "지도추출기 World";
+    document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
+    document.querySelectorAll("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.dataset.i18nPh); });
+    document.querySelectorAll("[data-i18n-aria]").forEach((el) => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+    document.querySelectorAll("[data-i18n-title]").forEach((el) => { el.title = t(el.dataset.i18nTitle); });
+    document.querySelectorAll("[data-lang]").forEach((b) => b.classList.toggle("on", b.dataset.lang === S.lang));
+  }
+  function setLang(lang) {
+    if (lang === S.lang) return;
+    S.lang = lang; save(); applyI18n(); renderTools();
+    $("pinColors").innerHTML = PIN_COLORS.map((c) => `<button data-c="${c}" style="background:${c}" aria-label="${t("pinColor", { n: c })}"></button>`).join("");
+    if (data.world) { renderCrumbs(); renderList(); renderChips(); render(); }
+  }
+
+  // 색 고르기 팝업: 파스텔 30색 + 무채색 6색 + 직접 선택
+  let colorTarget = null;
+  const getCV = (k) => (k.startsWith("pal") ? S.palette[+k.slice(3)] : S[k]);
+  function setCV(k, c) {
+    if (k.startsWith("pal")) { S.palette[+k.slice(3)] = c; renderTools(); afterSelChange(); }
+    else { S[k] = c; S.preset = ""; render(); }
+    save(); syncControls();
+  }
+  function openColor(btn) {
+    colorTarget = btn.dataset.cv;
+    const cur = (getCV(colorTarget) || "").toLowerCase();
+    $("cgrid").innerHTML = PASTELS.map((c) => `<button data-c="${c}" style="background:${c}" class="${c === cur ? "on" : ""}" aria-label="${c}"></button>`).join("") +
+      `<span class="sep"></span>` + NEUTRALS.map((c) => `<button data-c="${c}" style="background:${c}" class="${c === cur ? "on" : ""}" aria-label="${c}"></button>`).join("");
+    $("cCustom").value = cur || "#ffffff";
+    const pop = $("colorPop"); pop.hidden = false;
+    if (!isPhone()) {
+      const r = btn.getBoundingClientRect();
+      pop.style.left = Math.min(window.innerWidth - 284, r.right + 10) + "px";
+      pop.style.top = Math.max(8, Math.min(window.innerHeight - pop.offsetHeight - 8, r.top - 40)) + "px";
+    }
+  }
+  function closeColor() { $("colorPop").hidden = true; colorTarget = null; }
+
   function syncControls() {
     const on = (id, v) => $(id).classList.toggle("on", v);
     on("shapeRound", S.shape === "round"); on("shapeAngle", S.shape === "angle");
     $("detail").value = S.detail; $("detailOut").textContent = S.detail;
     $("detailPresets").querySelectorAll("button").forEach((b) => b.classList.toggle("on", +b.dataset.d === +S.detail));
-    $("cFill").value = S.fill; $("cStroke").value = S.stroke; $("cBg").value = S.bg;
+    document.querySelectorAll(".cbtn[data-cv]").forEach((b) => { const c = getCV(b.dataset.cv); if (c) b.firstElementChild.style.background = c; });
+    document.querySelectorAll("#pickMode button").forEach((b) => b.classList.toggle("on", b.dataset.pick === S.pick));
     $("strokeW").value = S.strokeW; $("strokeOut").textContent = (+S.strokeW).toFixed(1);
     $("presets").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.preset === S.preset));
     $("labelMode").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.label === S.labels));
@@ -835,7 +973,7 @@
   function openSheet(open) {
     $("side").classList.toggle("open", open);
     $("sheetToggle").setAttribute("aria-expanded", String(open));
-    $("sheetToggle").setAttribute("aria-label", open ? "목록 닫기" : "목록 열기");
+    $("sheetToggle").setAttribute("aria-label", open ? t("sheetClose") : t("sheetOpen"));
   }
 
   function bind() {
@@ -846,8 +984,22 @@
     $("detail").oninput = (e) => { S.detail = +e.target.value; syncControls(); schedule(); };
     $("detail").onchange = save;
     $("detailPresets").onclick = (e) => { const d = e.target.dataset.d; if (d) setOpt("detail", +d); };
-    const colorIn = (id, k) => { $(id).oninput = (e) => { S[k] = e.target.value; S.preset = ""; save(); syncControls(); render(); }; };
-    colorIn("cFill", "fill"); colorIn("cStroke", "stroke"); colorIn("cBg", "bg");
+    document.addEventListener("click", (e) => {
+      const cb = e.target.closest(".cbtn[data-cv]");
+      if (cb) { e.stopPropagation(); return colorTarget === cb.dataset.cv && !$("colorPop").hidden ? closeColor() : openColor(cb); }
+      const lb = e.target.closest("[data-lang]");
+      if (lb) return setLang(lb.dataset.lang);
+      if (!$("colorPop").hidden && !e.target.closest("#colorPop")) closeColor();
+    });
+    $("cgrid").onclick = (e) => { const c = e.target.dataset.c; if (c && colorTarget) { setCV(colorTarget, c); closeColor(); } };
+    $("cCustom").oninput = (e) => { if (colorTarget) setCV(colorTarget, e.target.value); };
+    $("colorClose").onclick = closeColor;
+    $("pickMode").onclick = (e) => {
+      const p = e.target.closest("[data-pick]")?.dataset.pick;
+      if (!p) return;
+      S.pick = p; save(); syncControls();
+      hint(T[S.lang].hintPick[p]);
+    };
     $("strokeW").oninput = (e) => { S.strokeW = +e.target.value; $("strokeOut").textContent = S.strokeW.toFixed(1); paint(); };
     $("strokeW").onchange = save;
     $("presets").onclick = (e) => { const p = e.target.dataset.preset; if (p) { Object.assign(S, PRESETS[p], { preset: p }); save(); syncControls(); render(); } };
@@ -856,13 +1008,7 @@
     $("optOverseas").onchange = (e) => setOpt("overseas", e.target.checked);
     $("optAntarctica").onchange = (e) => { setOpt("antarctica", e.target.checked); renderCrumbs(); renderList(); };
     $("optBg").onchange = (e) => setOpt("exportBg", e.target.checked, false);
-    $("paletteEdit").oninput = (e) => {
-      const i = e.target.dataset.pi;
-      if (i == null) return;
-      S.palette[+i] = e.target.value; save();
-      $("paletteTools").querySelectorAll(".dot")[+i].style.background = e.target.value;
-      afterSelChange();
-    };
+
 
     $("tools").onclick = (e) => {
       const b = e.target.closest(".tool");
@@ -887,7 +1033,7 @@
     $("zoomFit").onclick = () => resetZoom(true);
     $("zoomUp").onclick = goUp;
 
-    $("pinColors").innerHTML = PIN_COLORS.map((c) => `<button data-c="${c}" style="background:${c}" aria-label="핀 색 ${c}"></button>`).join("");
+    $("pinColors").innerHTML = PIN_COLORS.map((c) => `<button data-c="${c}" style="background:${c}" aria-label="${t("pinColor", { n: c })}"></button>`).join("");
     $("pinColors").onclick = (e) => { const c = e.target.dataset.c; if (c && activePin) { activePin.color = c; setActivePin(activePin); } };
     $("pinSize").oninput = (e) => { if (activePin) { activePin.size = +e.target.value; paintPins(); } };
     $("pinBorder").onchange = (e) => { if (activePin) { activePin.border = e.target.checked; paintPins(); } };
@@ -996,7 +1142,7 @@
     document.addEventListener("keydown", (e) => {
       if (e.target.matches("input, textarea")) return;
       const mod = e.ctrlKey || e.metaKey;
-      if (mod && e.key.toLowerCase() === "c" && activePin) { pinClipboard = { ...activePin }; toast("핀 복사됨"); e.preventDefault(); }
+      if (mod && e.key.toLowerCase() === "c" && activePin) { pinClipboard = { ...activePin }; toast(t("pinCopied")); e.preventDefault(); }
       else if (mod && e.key.toLowerCase() === "v" && pinClipboard) { dupPin(pinClipboard); pinClipboard = { ...activePin }; e.preventDefault(); }
       else if ((e.key === "Delete" || e.key === "Backspace") && activePin) { pins = pins.filter((p) => p !== activePin); setActivePin(null); e.preventDefault(); }
       else if (e.key === "Escape") { if (S.tool === "pin") setTool(toolBeforePin); setActivePin(null); closePanels(); }
@@ -1032,7 +1178,7 @@
 
   // ---------- 시작 ----------
   async function init() {
-    syncControls(); renderTools(); bind();
+    applyI18n(); syncControls(); renderTools(); bind();
     showLoading(true);
     try {
       const [world, idx, idx2] = await Promise.all([loadJSON("data/world.json"), loadJSON("data/adm1-index.json"), loadJSON("data/adm2-index.json")]);
@@ -1042,7 +1188,7 @@
       data.adm1Index = new Set(idx);
       data.adm2Index = new Set(Object.values(idx2).flat());
     } catch (err) {
-      $("loading").textContent = "지도 데이터를 불러오지 못했습니다. 새로고침해 주세요.";
+      $("loading").textContent = t("loadFail2");
       console.error(err);
       return;
     }
@@ -1057,7 +1203,7 @@
     renderChips();
     await routeFromHash();
     if (!S.seenIntro) {
-      hint(isPhone() ? "누르면 확대되며 한 단계씩 들어가요 · 마지막 단계에서 누르면 선택 · 길게 누르면 그 단계에서 선택" : "클릭하면 확대되며 한 단계씩 들어가요 · 마지막 단계에서 클릭하면 선택 · Shift+클릭은 그 단계에서 선택", 7000);
+      hint(isPhone() ? t("introPhone") : t("introPC"), 7000);
       S.seenIntro = true; save();
     }
   }
